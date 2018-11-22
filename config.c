@@ -19,6 +19,7 @@
  ****************************************************************
  */
 
+#define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -178,9 +179,7 @@ int remove_by_service(node_t ** head, char *service)
 
 node_t *get_config(node_t *head, char *user, char *service)
 {
-  slog(user);
-  slog(service);
-
+  char *LOG;
   char *pch;
   char *conf_line[4];
   int i,index = 0;
@@ -189,19 +188,12 @@ node_t *get_config(node_t *head, char *user, char *service)
   char *line = NULL;
   size_t len = 0;
   ssize_t nread;
-  
-  /*node_t *head = NULL;
-  head = malloc(sizeof(node_t));
-  if (head == NULL){
-    slog("can't allocate memory");
-    exit(1);
-  }
-  */
 
-  slog("stable1");
   stream = fopen(CONFFILE, "r");
   if (stream == NULL) {
-    slog("problem: can't open CONFFILE");
+    asprintf(&LOG, "can't open file: %s", CONFFILE);
+    slog(LOG);
+    free(LOG);
     exit(1);
   }
   else {

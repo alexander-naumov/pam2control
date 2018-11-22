@@ -24,6 +24,7 @@
  * gcc -shared -o pam2control.so pam2control.o config.o log.o -lpam
 */
 
+#define _GNU_SOURCE
 #include <stdio.h>
 #include <string.h>
 #include <syslog.h>
@@ -45,19 +46,11 @@ char *get_default()
 
 int allow(pam_handle_t *pamh, char *log_prefix, char *service, char *user)
 {
-  char *def0 = "DEFAULT is set to ";
-  char *def1 = get_default();
+  char *LOG;
 
-  char *DEFAULT = malloc(
-    strlen(def0) +
-    strlen(def1) + 1);
-
-  if (DEFAULT) {
-    strcpy (DEFAULT, def0);
-    strcat (DEFAULT, def1);
-  }	  
-  slog(DEFAULT);
-  free(DEFAULT);
+  asprintf(&LOG, "DEFAULT is set to %s", get_default());
+  slog(LOG);
+  free(LOG);
   
   node_t *conf = NULL;
   conf = malloc(sizeof(node_t));
