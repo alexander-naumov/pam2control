@@ -35,22 +35,10 @@
 #include "config.h"
 #include "log.h"
 
-//settings_t *get_default();
 void get_default(settings_t *);
 int get_config(node_t *, char *, char *);
 void slog(char *log_string);
 char *make_log_prefix(char *service, char *user);
-
-
-int in(char **arr, int len, char *target) {
-  int i;
-  for(i = 0; i < len; i++) {
-    if(strncmp(arr[i], target, strlen(target)) == 0) {
-      return 1;
-    }
-  }
-  return 0;
-}
 
 
 int allow(pam_handle_t *pamh, char *log_prefix, char *service, char *user)

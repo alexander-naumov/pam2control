@@ -187,7 +187,6 @@ node_t *get_config(node_t *head, char *user, char *service)
   FILE *stream;
   char *line = NULL;
   size_t len = 0;
-  ssize_t nread;
 
   stream = fopen(CONFFILE, "r");
   if (stream == NULL) {
@@ -200,7 +199,7 @@ node_t *get_config(node_t *head, char *user, char *service)
     slog("CONFFILE was opened successfully");
   }
 
-  while ((nread = getline(&line, &len, stream)) != -1) {
+  while ((getline(&line, &len, stream)) != -1) {
     slog(line);
     i = 0;
     pch = strtok (line," ");
