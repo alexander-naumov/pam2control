@@ -39,10 +39,69 @@ int get_config(node_t *, char *, char *);
 void slog(char *log_string);
 char *make_log_prefix(char *service, char *user);
 
+
+int in(char **arr, int len, char *target) {
+  int i;
+  for(i = 0; i < len; i++) {
+    if(strncmp(arr[i], target, strlen(target)) == 0) {
+      return 1;
+    }
+  }
+  return 0;
+}
+
+
 char *get_default()
 {
+  size_t len = 0;
+  char *line = NULL;
+  FILE *stream;
+
+
+  char* MAILSERVER = NULL;
+  char* DEFAULT = NULL;
+  char* DEBUG = NULL;
+
+  stream = fopen(CONFFILE, "r");
+  if (stream == NULL) {
+    asprintf(&LOG, "can't open file: %s", CONFFILE);
+    slog(LOG);
+    free(LOG);
+    exit(1);
+  }
+  else {
+    slog("CONFFILE was opened successfully");
+  }
+
+  while ((nread = getline(&line, &len, stream)) != -1) {
+    slog(line);
+    pch = strtok (line,":");
+    while (pch != NULL) {
+      if (strncmp("MAILSERVER", pch, strlen(pch)) == 0)
+	pch = strtok (NULL, ":");
+        MAILSERVER = pch;
+	break;
+
+      else if (strncmp("DEFAULT", pch, strlen(pch)) == 0)
+	pch = strtok (NULL, ":");
+        DEFAULT = pch;
+	break;
+
+      else if (strncmp("DEBUG", pch, strlen(pch)) == 0)
+	pch = strtok (NULL, ":");
+        DEBUG = pch;
+	break;
+    }
+      //option = malloc(sizeof(pch));
+      //strcpy(option, pch);
+      //if (in(LIST, 3, pch)
+      //pch = strtok (NULL, " ");
+    }
+
+
   return "OPEN";
 }
+
 
 int allow(pam_handle_t *pamh, char *log_prefix, char *service, char *user)
 {
