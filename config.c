@@ -232,3 +232,47 @@ node_t *get_config(node_t *head, char *user, char *service)
   return head;
 }
 
+
+void get_default(settings_t *def)
+{
+  size_t len = 0;
+  FILE *stream;
+  char *line = NULL;
+  char *pch;
+  char *LOG;
+
+  stream = fopen(CONFFILE, "r");
+  if (stream == NULL) {
+    asprintf(&LOG, "can't open file: %s", CONFFILE);
+    slog(LOG);
+    free(LOG);
+    exit(1);
+  }
+  else {
+    slog("DEBUG: default() CONFFILE was opened successfully");
+  }
+
+  while ((getline(&line, &len, stream)) != -1) {
+    if (strchr(line, ':') == NULL)
+      continue;
+
+    pch = strtok (line,":");
+    if (strncmp("MAILSERVER", pch, strlen(pch)) == 0) {
+      pch = strtok (NULL, ":");
+      def->MAILSERVER = malloc(sizeof(pch));
+      strncpy(def->MAILSERVER, pch, sizeof(pch));
+    }
+    else if (strncmp("DEFAULT", pch, strlen(pch)) == 0) {
+      pch = strtok (NULL, ":");
+      def->DEFAULT = malloc(sizeof(pch));
+      strncpy(def->DEFAULT, pch, sizeof(pch));
+    }
+    else if (strncmp("DEBUG", pch, strlen(pch)) == 0) {
+      pch = strtok (NULL, ":");
+      def->DEBUG = malloc(sizeof(pch));
+      strncpy(def->DEBUG, pch, sizeof(pch));
+    }
+  }
+  fclose(stream);
+}
+

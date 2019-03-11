@@ -35,6 +35,8 @@
 #include "config.h"
 #include "log.h"
 
+//settings_t *get_default();
+void get_default(settings_t *);
 int get_config(node_t *, char *, char *);
 void slog(char *log_string);
 char *make_log_prefix(char *service, char *user);
@@ -51,66 +53,25 @@ int in(char **arr, int len, char *target) {
 }
 
 
-char *get_default()
-{
-  size_t len = 0;
-  char *line = NULL;
-  FILE *stream;
-
-
-  char* MAILSERVER = NULL;
-  char* DEFAULT = NULL;
-  char* DEBUG = NULL;
-
-  stream = fopen(CONFFILE, "r");
-  if (stream == NULL) {
-    asprintf(&LOG, "can't open file: %s", CONFFILE);
-    slog(LOG);
-    free(LOG);
-    exit(1);
-  }
-  else {
-    slog("CONFFILE was opened successfully");
-  }
-
-  while ((nread = getline(&line, &len, stream)) != -1) {
-    slog(line);
-    pch = strtok (line,":");
-    while (pch != NULL) {
-      if (strncmp("MAILSERVER", pch, strlen(pch)) == 0)
-	pch = strtok (NULL, ":");
-        MAILSERVER = pch;
-	break;
-
-      else if (strncmp("DEFAULT", pch, strlen(pch)) == 0)
-	pch = strtok (NULL, ":");
-        DEFAULT = pch;
-	break;
-
-      else if (strncmp("DEBUG", pch, strlen(pch)) == 0)
-	pch = strtok (NULL, ":");
-        DEBUG = pch;
-	break;
-    }
-      //option = malloc(sizeof(pch));
-      //strcpy(option, pch);
-      //if (in(LIST, 3, pch)
-      //pch = strtok (NULL, " ");
-    }
-
-
-  return "OPEN";
-}
-
-
 int allow(pam_handle_t *pamh, char *log_prefix, char *service, char *user)
 {
-  char *LOG;
+  settings_t *def = NULL;
+  def = malloc(sizeof(settings_t));
+  if (def == NULL) {
+    slog("error, can't allocate memory");
+    exit(1);
+  }
 
-  asprintf(&LOG, "DEFAULT is set to %s", get_default());
+  get_default(def);
+
+  //slog(def->DEFAULT);
+  //slog(def->DEBUG);
+
+  char *LOG;
+  asprintf(&LOG, "DEFAULT is set to %s", def->DEFAULT);
   slog(LOG);
   free(LOG);
-  
+
   node_t *conf = NULL;
   conf = malloc(sizeof(node_t));
   if (conf == NULL){
@@ -120,9 +81,10 @@ int allow(pam_handle_t *pamh, char *log_prefix, char *service, char *user)
   
   get_config(conf, user, service);
   slog("I got node_t");
+
   return PAM_SUCCESS;
   /*
-  if (strcmp(def1, "OPEN") == r)
+  if (strcmp(def->DEFAULT, "OPEN") == 0)
     return PAM_SUCCESS;
   else
     return PAM_AUTH_ERR;

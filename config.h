@@ -24,6 +24,12 @@
 
 #define CONFFILE "/etc/pam2control/p2c.conf"
 
+typedef struct settings {
+    char *DEFAULT;
+    char *DEBUG;
+    char *MAILSERVER;
+} settings_t;
+
 typedef struct node {
     int index;
     char *service;
