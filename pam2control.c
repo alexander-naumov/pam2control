@@ -74,6 +74,7 @@ int allow(pam_handle_t *pamh, char *log_prefix, char *service, char *user)
 
 int pam_sm_open_session(pam_handle_t *pamh, int flags, int argc, const char **argv)
 {
+  slog(1, "==== open new session =========================");
   return PAM_SUCCESS;
 }
 
@@ -106,6 +107,7 @@ int pam_sm_setcred(pam_handle_t *pamh, int flags, int argc, const char **argv)
 
 int pam_sm_close_session(pam_handle_t *pamh, int flags, int argc, const char **argv)
 {
+  slog(1, "==== closing session ==========================");
   return PAM_SUCCESS;
 }
 
