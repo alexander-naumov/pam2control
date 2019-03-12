@@ -19,11 +19,6 @@
  ****************************************************************
  */
 
-/*
- * gcc -fPIC -c pam2control.c config.c log.c
- * gcc -shared -o pam2control.so pam2control.o config.o log.o -lpam
-*/
-
 #define _GNU_SOURCE
 #include <stdio.h>
 #include <string.h>
