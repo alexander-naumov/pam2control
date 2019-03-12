@@ -32,7 +32,7 @@
 
 void get_default(settings_t *);
 int get_config(node_t *, char *, char *);
-void slog(char *log_string);
+void slog(int number, ...);
 char *make_log_prefix(char *service, char *user);
 
 
@@ -41,7 +41,7 @@ int allow(pam_handle_t *pamh, char *log_prefix, char *service, char *user)
   settings_t *def = NULL;
   def = malloc(sizeof(settings_t));
   if (def == NULL) {
-    slog("error, can't allocate memory");
+    slog(1, "error, can't allocate memory");
     exit(1);
   }
 
@@ -50,20 +50,17 @@ int allow(pam_handle_t *pamh, char *log_prefix, char *service, char *user)
   //slog(def->DEFAULT);
   //slog(def->DEBUG);
 
-  char *LOG;
-  asprintf(&LOG, "DEFAULT is set to %s", def->DEFAULT);
-  slog(LOG);
-  free(LOG);
+  slog(2, "DEFAULT is set to ", def->DEFAULT);
 
   node_t *conf = NULL;
   conf = malloc(sizeof(node_t));
   if (conf == NULL){
-    slog("error, can't allocate memory");
+    slog(1, "error, can't allocate memory");
     exit(1);
   }
   
   get_config(conf, user, service);
-  slog("I got node_t");
+  slog(1, "I got node_t");
 
   return PAM_SUCCESS;
   /*
@@ -92,7 +89,7 @@ int pam_sm_authenticate(pam_handle_t *pamh, int flags, int argc, const char **ar
   (void) pam_get_item(pamh, PAM_RHOST, (const void **) &host);
 
   char *log_prefix = make_log_prefix(service, user);
-  slog("==== authentication phase =====================");
+  slog(1, "==== authentication phase =====================");
 
   if (strstr(host,"::1"))
     host = "localhost";

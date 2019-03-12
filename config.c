@@ -28,7 +28,7 @@
 
 #include "config.h"
 
-void slog(char *log_string);
+void slog(int number, ...);
 char *make_log_prefix(char *service, char *user);
 
 int length(struct node* head)
@@ -78,8 +78,7 @@ void print_list(node_t *cur)
 	strcat(log_node, cur_param);
 	strcat(log_node, cur->param);
     }
-    slog("A");
-    slog(log_node);
+    slog(1, log_node);
     cur = cur->next;
   }
   free(log_node);
@@ -190,17 +189,13 @@ node_t *get_config(node_t *head, char *user, char *service)
 
   stream = fopen(CONFFILE, "r");
   if (stream == NULL) {
-    asprintf(&LOG, "can't open file: %s", CONFFILE);
-    slog(LOG);
-    free(LOG);
+    slog(2, "can't open file: ", CONFFILE);
     exit(1);
   }
-  else {
-    slog("CONFFILE was opened successfully");
-  }
+  slog(1, "CONFFILE was opened successfully");
 
   while ((getline(&line, &len, stream)) != -1) {
-    slog(line);
+    slog(1, line);
     i = 0;
     pch = strtok (line," ");
 
@@ -242,14 +237,10 @@ void get_default(settings_t *def)
 
   stream = fopen(CONFFILE, "r");
   if (stream == NULL) {
-    asprintf(&LOG, "can't open file: %s", CONFFILE);
-    slog(LOG);
-    free(LOG);
+    slog(2, "can't open file: ", CONFFILE);
     exit(1);
   }
-  else {
-    slog("DEBUG: default() CONFFILE was opened successfully");
-  }
+  slog(1, "DEBUG: default() CONFFILE was opened successfully");
 
   while ((getline(&line, &len, stream)) != -1) {
     if (strchr(line, ':') == NULL)

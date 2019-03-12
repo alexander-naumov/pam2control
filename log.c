@@ -19,17 +19,42 @@
  ****************************************************************
  */
 
+#define _GNU_SOURCE
+#include<stdio.h>
 #include<syslog.h>
 #include<string.h>
 #include<stdlib.h>
+#include<stdarg.h>
 
 const char *log_p;
 
-void slog(char *log_string)
+void slog(int arg_count, ...)
 {
+  int i;
+  va_list ap;
+  va_start(ap, arg_count);
+
+  char *str;
+  int len = 0;
+  for (i=1; i <= arg_count; i++) {
+    str = va_arg(ap, char *);
+    len += strlen(str);
+  }
+
+  va_start(ap, arg_count);
+
+  char *LOG = malloc(len + 1);
+  if (LOG) {
+    strcpy (LOG, va_arg(ap, char *));
+
+    for (i = 2; i <= arg_count; i++)
+      strcat(LOG, va_arg(ap, char *));
+  }
   openlog (log_p, LOG_CONS | LOG_PID | LOG_NDELAY, LOG_LOCAL1);
-  syslog (LOG_INFO, log_string);
+  syslog (LOG_INFO, LOG);
+  free(LOG);
 }
+
 
 char *make_log_prefix(char *service, char *user)
 {
