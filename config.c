@@ -178,7 +178,6 @@ int remove_by_service(node_t ** head, char *service)
 
 node_t *get_config(node_t *head, char *user, char *service)
 {
-  char *LOG;
   char *pch;
   char *conf_line[4];
   int i,index = 0;
@@ -233,7 +232,6 @@ void get_default(settings_t *def)
   FILE *stream;
   char *line = NULL;
   char *pch;
-  char *LOG;
 
   stream = fopen(CONFFILE, "r");
   if (stream == NULL) {
@@ -249,18 +247,15 @@ void get_default(settings_t *def)
     pch = strtok (line,":");
     if (strncmp("MAILSERVER", pch, strlen(pch)) == 0) {
       pch = strtok (NULL, ":");
-      def->MAILSERVER = malloc(sizeof(pch));
-      strncpy(def->MAILSERVER, pch, sizeof(pch));
+      def->MAILSERVER = strdup(pch);
     }
     else if (strncmp("DEFAULT", pch, strlen(pch)) == 0) {
       pch = strtok (NULL, ":");
-      def->DEFAULT = malloc(sizeof(pch));
-      strncpy(def->DEFAULT, pch, sizeof(pch));
+      def->DEFAULT = strdup(pch);
     }
     else if (strncmp("DEBUG", pch, strlen(pch)) == 0) {
       pch = strtok (NULL, ":");
-      def->DEBUG = malloc(sizeof(pch));
-      strncpy(def->DEBUG, pch, sizeof(pch));
+      def->DEBUG = strdup(pch);
     }
   }
   fclose(stream);
