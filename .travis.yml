@@ -13,3 +13,5 @@ compiler:
 
 script:
   - make
+  - echo $?
+  - ls -la pam2control.so
