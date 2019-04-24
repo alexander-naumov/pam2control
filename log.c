@@ -31,24 +31,27 @@ const char *log_p;
 void slog(int arg_count, ...)
 {
   int i;
+  int len = 0;
+  char *LOG;
+  char *str;
+
   va_list ap;
   va_start(ap, arg_count);
 
-  char *str;
-  int len = 0;
   for (i=1; i <= arg_count; i++) {
     str = va_arg(ap, char *);
     len += strlen(str);
-  }
 
-  va_start(ap, arg_count);
-
-  char *LOG = malloc(len + 1);
-  if (LOG) {
-    strcpy (LOG, va_arg(ap, char *));
-
-    for (i = 2; i <= arg_count; i++)
-      strcat(LOG, va_arg(ap, char *));
+    if (i==1) {
+      LOG = (char *)malloc(len + 1);
+      if (LOG)
+        strcpy (LOG, str);
+    }
+    else{
+      LOG = (char *)realloc(LOG, len + 1);
+      if (LOG)
+        strcat(LOG, str);
+    }
   }
   openlog (log_p, LOG_CONS | LOG_PID | LOG_NDELAY, LOG_LOCAL1);
   syslog (LOG_INFO, LOG);
