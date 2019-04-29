@@ -86,18 +86,15 @@ void print_list(node_t *cur)
 
 void push(node_t *head, int index, char *service, char *option, char *target, char *param) {
     node_t *cur = head;
-    while (cur->next != NULL) {
-        cur = cur->next;
-    }
-    cur->next = malloc(sizeof(node_t));
+    cur = cur->next;
+    cur = malloc(sizeof(node_t));
 
-    cur->next->index   = index;
-    cur->next->service = service;
-    cur->next->option  = option;
-    cur->next->target  = target;
-    cur->next->param   = param;
-
-    cur->next->next = NULL;
+    cur->index   = index;
+    cur->service = service;
+    cur->option  = option;
+    cur->target  = target;
+    cur->param   = param;
+    cur->next = NULL;
 }
 
 void push_start(node_t **head, int index, char *service, char *option, char *target, char *param) {
@@ -194,13 +191,11 @@ node_t *get_config(node_t *head, char *user, char *service)
   slog(1, "CONFFILE was opened successfully");
 
   while ((getline(&line, &len, stream)) != -1) {
-    slog(1, line);
     i = 0;
     pch = strtok (line," ");
 
     while (pch != NULL) {
-      conf_line[i] = malloc(sizeof(pch));
-      strcpy(conf_line[i], pch);
+      conf_line[i] = strdup(pch);
       pch = strtok (NULL, " ");
       i++;
     }
@@ -213,8 +208,8 @@ node_t *get_config(node_t *head, char *user, char *service)
     index++;
   }
   fclose(stream);
-  pop(&head);
-  remove_by_service(&head, service);
+  //pop(&head);
+  //remove_by_service(&head, service);
 
   //printf("length = %d\n", length(head)); 
   //printf("---------------------------\n");
