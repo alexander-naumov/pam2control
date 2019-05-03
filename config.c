@@ -44,7 +44,7 @@ int length(struct node* head)
 
 void print_list(node_t *cur)
 {
-  char *log_node;// = NULL;
+  char *log_node = NULL;
 
   char *cur_service= "Service:   ";
   char *cur_option = "\nOption:    ";
@@ -53,7 +53,6 @@ void print_list(node_t *cur)
 
   //node_t *cur = head;
   while (cur != NULL) {
-    log_node = NULL;
     log_node = malloc(
 	strlen(cur_service) +
 	strlen(cur_option) +
