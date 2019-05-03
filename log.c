@@ -32,7 +32,7 @@ void slog(int arg_count, ...)
 {
   int i;
   int len = 0;
-  char *LOG;
+  char *LOG = NULL;
   char *str;
 
   va_list ap;

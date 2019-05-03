@@ -176,7 +176,7 @@ int remove_by_service(node_t ** head, char *service)
 node_t *get_config(node_t *head, char *user, char *service)
 {
   char *pch;
-  char *conf_line[4];
+  char *conf_line[4] = {NULL, NULL, NULL, NULL};
   int i,index = 0;
 
   FILE *stream;
@@ -199,13 +199,15 @@ node_t *get_config(node_t *head, char *user, char *service)
       pch = strtok (NULL, " ");
       i++;
     }
-    head->index   = index;
-    head->service = conf_line[0];
-    head->option  = conf_line[1];
-    head->target  = conf_line[2];
-    head->param   = conf_line[3];
-    push(head, head->index, head->service, head->option, head->target, head->param);
-    index++;
+    if (conf_line[0] && conf_line[1] && conf_line[2] && conf_line[3]) {
+      head->index   = index;
+      head->service = conf_line[0];
+      head->option  = conf_line[1];
+      head->target  = conf_line[2];
+      head->param   = conf_line[3];
+      push(head, head->index, head->service, head->option, head->target, head->param);
+      index++;
+    }
   }
   fclose(stream);
   //pop(&head);
