@@ -30,6 +30,7 @@
 #include "config.h"
 #include "log.h"
 
+void print_list(node_t *);
 void get_default(settings_t *);
 int get_config(node_t *, char *, char *);
 void slog(int number, ...);
@@ -47,10 +48,11 @@ int allow(pam_handle_t *pamh, char *log_prefix, char *service, char *user)
 
   get_default(def);
 
-  //slog(def->DEFAULT);
-  //slog(def->DEBUG);
-
   slog(2, "DEFAULT is set to ", def->DEFAULT);
+  if (def->DEBUG)
+    slog(1, "DEBUG is set to TRUE");
+  else
+    slog(1, "DEBUG is set to FALSE");
 
   node_t *conf = NULL;
   conf = malloc(sizeof(node_t));
@@ -61,6 +63,9 @@ int allow(pam_handle_t *pamh, char *log_prefix, char *service, char *user)
   
   get_config(conf, user, service);
   slog(1, "I got node_t");
+
+  if (def->DEBUG && conf)
+    print_list(conf);
 
   return PAM_SUCCESS;
   /*

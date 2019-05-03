@@ -19,14 +19,16 @@
  ****************************************************************
  */
 
+
 #ifndef CONFIG_H
 #define CONFIG_H
 
+#include<stdbool.h>
 #define CONFFILE "/etc/pam2control/p2c.conf"
 
 typedef struct settings {
     char *DEFAULT;
-    char *DEBUG;
+    bool DEBUG;
     char *MAILSERVER;
 } settings_t;
 

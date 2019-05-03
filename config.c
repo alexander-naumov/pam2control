@@ -54,28 +54,28 @@ void print_list(node_t *cur)
   //node_t *cur = head;
   while (cur != NULL) {
     log_node = malloc(
-	strlen(cur_service) +
-	strlen(cur_option) +
-	strlen(cur_target) +
-	strlen(cur_param) +
+	  strlen(cur_service) +
+	  strlen(cur_option) +
+	  strlen(cur_target) +
+	  strlen(cur_param) +
 
-	strlen(cur->service) +
-	strlen(cur->option) +
-	strlen(cur->target) +
-	strlen(cur->param) + 1);
+	  strlen(cur->service) +
+	  strlen(cur->option) +
+	  strlen(cur->target) +
+	  strlen(cur->param) + 1);
 
     if (log_node) {
-	strcpy(log_node, cur_service);
-	strcat(log_node, cur->service);
+	  strcpy(log_node, cur_service);
+	  strcat(log_node, cur->service);
 
-	strcat(log_node, cur_option);
-	strcat(log_node, cur->option);
+	  strcat(log_node, cur_option);
+	  strcat(log_node, cur->option);
 
-	strcat(log_node, cur_target);
-	strcat(log_node, cur->target);
+	  strcat(log_node, cur_target);
+	  strcat(log_node, cur->target);
 
-	strcat(log_node, cur_param);
-	strcat(log_node, cur->param);
+	  strcat(log_node, cur_param);
+	  strcat(log_node, cur->param);
     }
     slog(1, log_node);
     cur = cur->next;
@@ -85,15 +85,20 @@ void print_list(node_t *cur)
 
 void push(node_t *head, int index, char *service, char *option, char *target, char *param) {
     node_t *cur = head;
-    cur = cur->next;
-    cur = malloc(sizeof(node_t));
-
-    cur->index   = index;
-    cur->service = service;
-    cur->option  = option;
-    cur->target  = target;
-    cur->param   = param;
-    cur->next = NULL;
+    while (cur->next != NULL) {
+      cur = cur->next;
+    }
+    cur->next = malloc(sizeof(node_t));
+    if (cur->next) {
+      cur->next->index   = index;
+      cur->next->service = service;
+      cur->next->option  = option;
+      cur->next->target  = target;
+      cur->next->param   = param;
+      cur->next->next    = NULL;
+    }
+    else
+      slog(1, "Error by parsing config: can't allocate memory...");
 }
 
 void push_start(node_t **head, int index, char *service, char *option, char *target, char *param) {
@@ -172,6 +177,7 @@ int remove_by_service(node_t ** head, char *service)
   return 0;
 }
 
+
 node_t *get_config(node_t *head, char *user, char *service)
 {
   char *pch;
@@ -187,9 +193,13 @@ node_t *get_config(node_t *head, char *user, char *service)
     slog(2, "can't open file: ", CONFFILE);
     exit(1);
   }
-  slog(1, "CONFFILE was opened successfully");
+  //slog(1, "CONFFILE was opened successfully");
 
   while ((getline(&line, &len, stream)) != -1) {
+    slog(1,line);
+    if (line[0] == '#')
+      continue;
+
     i = 0;
     pch = strtok (line," ");
 
@@ -229,29 +239,36 @@ void get_default(settings_t *def)
   char *line = NULL;
   char *pch;
 
+  def->DEBUG = false;
+  def->MAILSERVER = NULL;
+  def->DEFAULT = "CLOSE";
+
   stream = fopen(CONFFILE, "r");
   if (stream == NULL) {
     slog(2, "can't open file: ", CONFFILE);
     exit(1);
   }
-  slog(1, "DEBUG: default() CONFFILE was opened successfully");
+  //slog(1, "DEBUG: default() CONFFILE was opened successfully");
 
   while ((getline(&line, &len, stream)) != -1) {
     if (strchr(line, ':') == NULL)
       continue;
 
     pch = strtok (line,":");
-    if (strncmp("MAILSERVER", pch, strlen(pch)) == 0) {
+    if (strncmp("MAILSERVER", pch, 10) == 0) {
       pch = strtok (NULL, ":");
       def->MAILSERVER = strdup(pch);
     }
-    else if (strncmp("DEFAULT", pch, strlen(pch)) == 0) {
+    else if (strncmp("DEFAULT", pch, 7) == 0) {
       pch = strtok (NULL, ":");
       def->DEFAULT = strdup(pch);
     }
-    else if (strncmp("DEBUG", pch, strlen(pch)) == 0) {
+    else if (strncmp("DEBUG", pch, 6) == 0) {
       pch = strtok (NULL, ":");
-      def->DEBUG = strdup(pch);
+      if((strncmp("True", pch, 4) == 0) ||
+         (strncmp("TRUE", pch, 4) == 0) ||
+         (strncmp("true", pch, 4) == 0))
+           def->DEBUG = true;
     }
   }
   fclose(stream);
