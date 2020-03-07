@@ -15,3 +15,5 @@ script:
   - cd src
   - make
   - ls -la pam2control.so
+  - sha256 pam2control.so
+  - nm pam2control.so
