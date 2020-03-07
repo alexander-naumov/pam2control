@@ -12,5 +12,6 @@ compiler:
 #    - debug
 
 script:
+  - cd src
   - make
   - ls -la pam2control.so
