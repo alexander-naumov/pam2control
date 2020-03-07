@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, 2019 Alexander Naumov <alexander_naumov@opensuse.org>
+ * Copyright (c) 2018-2020 Alexander Naumov <alexander_naumov@opensuse.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,4 +22,5 @@
 #ifndef LOG_H
 #define LOG_H
 
+extern char *log_p;
 #endif

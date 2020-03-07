@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, 2019 Alexander Naumov <alexander_naumov@opensuse.org>
+ * Copyright (c) 2018-2020 Alexander Naumov <alexander_naumov@opensuse.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,10 +34,10 @@ void print_list(node_t *);
 void get_default(settings_t *);
 int get_config(node_t *, char *, char *);
 void slog(int number, ...);
-char *make_log_prefix(char *service, char *user);
+void make_log_prefix(char *service, char *user);
 
 
-int allow(pam_handle_t *pamh, char *log_prefix, char *service, char *user)
+int allow(pam_handle_t *pamh, char *service, char *user)
 {
   settings_t *def = NULL;
   def = malloc(sizeof(settings_t));
@@ -94,13 +94,13 @@ int pam_sm_authenticate(pam_handle_t *pamh, int flags, int argc, const char **ar
   (void) pam_get_item(pamh, PAM_SERVICE, (const void **) &service);
   (void) pam_get_item(pamh, PAM_RHOST, (const void **) &host);
 
-  char *log_prefix = make_log_prefix(service, user);
+  make_log_prefix(service, user);
   slog(1, "==== authentication phase =====================");
 
   if (strstr(host,"::1"))
     host = "localhost";
   
-  return allow(pamh, log_prefix, service, user);
+  return allow(pamh, service, user);
 }
 
 
