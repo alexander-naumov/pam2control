@@ -238,8 +238,9 @@ void get_default(settings_t *def)
   FILE *stream;
   char *line = NULL;
   char *pch;
+  char *debug;
 
-  def->DEBUG = false;
+  def->DEBUG = 0;
   def->MAILSERVER = NULL;
   def->DEFAULT = "CLOSE";
 
@@ -255,20 +256,25 @@ void get_default(settings_t *def)
       continue;
 
     pch = strtok (line,":");
+
     if (strncmp("MAILSERVER", pch, 10) == 0) {
       pch = strtok (NULL, ":");
       def->MAILSERVER = strdup(pch);
     }
-    else if (strncmp("DEFAULT", pch, 7) == 0) {
+
+    if (strncmp("DEFAULT", pch, 7) == 0) {
       pch = strtok (NULL, ":");
       def->DEFAULT = strdup(pch);
     }
-    else if (strncmp("DEBUG", pch, 6) == 0) {
+
+    if (strncmp("DEBUG", pch, 6) == 0) {
       pch = strtok (NULL, ":");
-      if((strncmp("True", pch, 4) == 0) ||
-         (strncmp("TRUE", pch, 4) == 0) ||
-         (strncmp("true", pch, 4) == 0))
-           def->DEBUG = true;
+      debug = strdup(pch);
+
+      if((strncmp("True", debug, 4) == 0) ||
+         (strncmp("TRUE", debug, 4) == 0) ||
+         (strncmp("true", debug, 4) == 0))
+        def->DEBUG = 1;
     }
   }
   fclose(stream);

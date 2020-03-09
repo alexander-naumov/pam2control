@@ -32,7 +32,7 @@
 
 void print_list(node_t *);
 void get_default(settings_t *);
-int get_config(node_t *, char *, char *);
+int  get_config(node_t *, char *, char *);
 void slog(int number, ...);
 void make_log_prefix(char *service, char *user);
 
@@ -48,11 +48,13 @@ int allow(pam_handle_t *pamh, char *service, char *user)
 
   get_default(def);
 
-  slog(2, "DEFAULT is set to ", def->DEFAULT);
+  slog(3, "p2c: DEFAULT is set to ", def->DEFAULT, "'");
+  slog(3, "p2c: MAILSER is set to '", def->MAILSERVER, "'");
+
   if (def->DEBUG)
-    slog(1, "DEBUG is set to TRUE");
+    slog(1, "p2c: DEBUG is set to TRUE");
   else
-    slog(1, "DEBUG is set to FALSE");
+    slog(1, "p2c: DEBUG is set to FALSE");
 
   node_t *conf = NULL;
   conf = malloc(sizeof(node_t));
@@ -64,16 +66,13 @@ int allow(pam_handle_t *pamh, char *service, char *user)
   get_config(conf, user, service);
   slog(1, "I got node_t");
 
-  if (def->DEBUG && conf)
-    print_list(conf);
+ // if (def->DEBUG && conf)
+ //   print_list(conf);
 
-  return PAM_SUCCESS;
-  /*
-  if (strcmp(def->DEFAULT, "OPEN") == 0)
+  if (strncmp(def->DEFAULT, "OPEN", 4) == 0)
     return PAM_SUCCESS;
   else
     return PAM_AUTH_ERR;
-  */
 }
 
 

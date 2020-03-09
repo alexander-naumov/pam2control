@@ -23,21 +23,20 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#include<stdbool.h>
 #define CONFFILE "/etc/pam2control/p2c.conf"
 
 typedef struct settings {
     char *DEFAULT;
-    bool DEBUG;
+    int   DEBUG;
     char *MAILSERVER;
 } settings_t;
 
 typedef struct node {
-    int index;
-    char *service;
-    char *option;
-    char *target;
-    char *param;
+    int    index;
+    char  *service;
+    char  *option;
+    char  *target;
+    char  *param;
     struct node *next;
 } node_t;
 
