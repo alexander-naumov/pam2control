@@ -66,8 +66,10 @@ int allow(pam_handle_t *pamh, char *service, char *user)
   get_config(conf, user, service);
   slog(1, "I got node_t");
 
- // if (def->DEBUG && conf)
- //   print_list(conf);
+  if (def->DEBUG && conf) {
+    slog(1, "SHOW CONF");
+    print_list(conf);
+  }
 
   if (strncmp(def->DEFAULT, "OPEN", 4) == 0)
     return PAM_SUCCESS;

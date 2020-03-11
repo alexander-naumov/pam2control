@@ -51,8 +51,7 @@ void print_list(node_t *cur)
   char *cur_target = "\nTarget:    ";
   char *cur_param  = "\nParameters:";
 
-  //node_t *cur = head;
-  while (cur != NULL) {
+  while (cur->next) {
     log_node = malloc(
 	  strlen(cur_service) +
 	  strlen(cur_option) +
@@ -99,20 +98,6 @@ void push(node_t *head, int index, char *service, char *option, char *target, ch
     }
     else
       slog(1, "Error by parsing config: can't allocate memory...");
-}
-
-void push_start(node_t **head, int index, char *service, char *option, char *target, char *param) {
-    node_t * node;
-    node = malloc(sizeof(node_t));
-
-    node->index   = index;
-    node->service = service;
-    node->option  = option;
-    node->target  = target;
-    node->param   = param;
-
-    node->next = *head;
-    *head = node;
 }
 
 int pop(node_t ** head) {
@@ -178,7 +163,7 @@ int remove_by_service(node_t ** head, char *service)
 }
 
 
-node_t *get_config(node_t *head, char *user, char *service)
+void get_config(node_t *head, char *user, char *service)
 {
   char *pch;
   char *conf_line[4] = {NULL, NULL, NULL, NULL};
@@ -193,16 +178,17 @@ node_t *get_config(node_t *head, char *user, char *service)
     slog(2, "can't open file: ", CONFFILE);
     exit(1);
   }
-  //slog(1, "CONFFILE was opened successfully");
 
   while ((getline(&line, &len, stream)) != -1) {
-    slog(1,line);
-    if (line[0] == '#')
+    if ((line[0] == '#')                     ||
+        (strlen(line) < 9)                   ||
+        (strncmp("DEBUG", line, 5) == 0)     ||
+        (strncmp("DEFAULT", line, 7) == 0)   ||
+        (strncmp("MAILSERVER", line, 10) == 0))
       continue;
 
     i = 0;
     pch = strtok (line," ");
-
     while (pch != NULL) {
       conf_line[i] = strdup(pch);
       pch = strtok (NULL, " ");
@@ -228,7 +214,7 @@ node_t *get_config(node_t *head, char *user, char *service)
   //print_list(head);
   free(line);
   //free(head);
-  return head;
+  //return head;
 }
 
 
@@ -249,7 +235,6 @@ void get_default(settings_t *def)
     slog(2, "can't open file: ", CONFFILE);
     exit(1);
   }
-  //slog(1, "DEBUG: default() CONFFILE was opened successfully");
 
   while ((getline(&line, &len, stream)) != -1) {
     if (strchr(line, ':') == NULL)
@@ -267,7 +252,7 @@ void get_default(settings_t *def)
       def->DEFAULT = strdup(pch);
     }
 
-    if (strncmp("DEBUG", pch, 6) == 0) {
+    if (strncmp("DEBUG", pch, 5) == 0) {
       pch = strtok (NULL, ":");
       debug = strdup(pch);
 
