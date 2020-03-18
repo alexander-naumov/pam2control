@@ -29,11 +29,11 @@
 #include "config.h"
 #include "pam2control.h"
 
-void slog(int number, ...);
-void blog(void *, char *);
-void ilog(int number, char *);
-char *make_log_prefix(char *service, char *user);
-void rmn(char *str);
+void    slog(int, ...);
+void    blog(void *, char *);
+void    ilog(int, char *);
+char *  make_log_prefix(char *, char *);
+void    rmn(char *);
 
 int length(struct node* head)
 {

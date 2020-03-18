@@ -30,15 +30,15 @@
 #include "config.h"
 #include "log.h"
 
-void print_list(node_t *);
-void get_default(settings_t *);
-int  get_config(node_t *conf, char *, char *);
-void slog(int number, ...);
-void blog(void *address, char *str);
-void make_log_prefix(char *service, char *user);
-int remove_by_service(node_t *, char *service);
-access_t *create_access(access_t *access_open, char *flavor, node_t *conf);
-void print_access(access_t *access_open, char *flavor);
+void       print_list(node_t *);
+void       print_access(access_t *, char *);
+void       get_default(settings_t *);
+int        get_config(node_t *, char *, char *);
+void       slog(int number, ...);
+void       blog(void *, char *);
+void       make_log_prefix(char *, char *);
+int        remove_by_service(node_t *, char *);
+access_t * create_access(access_t *, char *, node_t *);
 
 const int *DEBUG;
 
