@@ -22,5 +22,5 @@
 #ifndef PAM2CONTROL_H
 #define PAM2CONTROL_H
 
-extern int *DEBUG;
+extern int DEBUG;
 #endif
