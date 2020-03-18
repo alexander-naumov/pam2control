@@ -25,6 +25,11 @@
 
 #define CONFFILE "/etc/pam2control/p2c.conf"
 
+typedef struct access {
+    char *user;
+    struct access *next;
+} access_t;
+
 typedef struct settings {
     char *DEFAULT;
     int   DEBUG;

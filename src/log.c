@@ -28,6 +28,19 @@
 
 const char *log_p;
 
+void ilog(int number, char *str)
+{
+  openlog (log_p, LOG_CONS | LOG_PID | LOG_NDELAY, LOG_LOCAL1);
+  syslog (LOG_INFO, "%d %s", number, str);
+}
+
+void blog(void *address, char *str)
+{
+  openlog (log_p, LOG_CONS | LOG_PID | LOG_NDELAY, LOG_LOCAL1);
+  syslog (LOG_INFO, "%p %s", address, str);
+}
+
+
 void slog(int arg_count, ...)
 {
   int i;

@@ -13,6 +13,6 @@ show you how deep is this rabbit hole ;-)
 Credits
 -------
 
-Copyright (c) 2018-2019 Alexander Naumov (alexander_naumov@opensuse.org).
+Copyright (c) 2018-2020 Alexander Naumov (alexander_naumov@opensuse.org).
 
-Licensed under GNU GPLv3 (see LICENSE file).
+Licensed under GNU GPLv3 (see [LICENSE](https://github.com/alexander-naumov/pam2control/blob/master/LICENSE) file).

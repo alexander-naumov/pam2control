@@ -27,9 +27,13 @@
 #include <syslog.h>
 
 #include "config.h"
+#include "pam2control.h"
 
 void slog(int number, ...);
+void blog(void *, char *);
+void ilog(int number, char *);
 char *make_log_prefix(char *service, char *user);
+void rmn(char *str);
 
 int length(struct node* head)
 {
@@ -42,6 +46,21 @@ int length(struct node* head)
   return count;
 }
 
+
+void print_access(access_t *LIST, char *flavor)
+{
+  slog(3, "==== ACCESS ", flavor, " ===========");
+  if (LIST == NULL) {
+    slog(1, "NULL...");
+    return;
+  }
+
+  while(LIST) {
+    blog(LIST, LIST->user);
+    LIST = LIST->next;
+  }
+}
+
 void print_list(node_t *cur)
 {
   char *log_node = NULL;
@@ -52,6 +71,7 @@ void print_list(node_t *cur)
   char *cur_param  = "\nParameters:";
 
   while (cur->next) {
+    blog(&cur->next -1, "");
     log_node = malloc(
 	  strlen(cur_service) +
 	  strlen(cur_option) +
@@ -77,10 +97,69 @@ void print_list(node_t *cur)
 	  strcat(log_node, cur->param);
     }
     slog(1, log_node);
+    slog(1, "----");
     cur = cur->next;
   }
   free(log_node);
 }
+
+
+access_t *push_access(access_t *cur, char *user)
+{
+  slog(1, "=============================");
+  blog(cur, "push_access");
+
+  if (cur != NULL) {
+    slog(1,"access_open != NULL");
+    cur = cur->next;
+  }
+
+  if (cur == NULL) {
+      slog(1, "access_open == NULL");
+      cur = malloc(sizeof(access_t));
+      if (cur)
+        blog(cur, " <- new address from malloc");
+      else
+        slog(1, "Error by parsing access: can't allocate memory...");
+  }
+
+  if (cur) {
+        slog(2,"CREATE NEW access_open struct -> ", user);
+        cur->user = user;
+        cur->next = NULL;
+  }
+  return cur;
+}
+
+
+access_t *create_access(access_t *cur, char *flavor, node_t* conf)
+{
+  access_t *ret = cur;
+  blog(cur, " &cur CREATE_ACCESS");
+
+  while(conf->next) {
+    if (strncmp(conf->option, flavor, strlen(flavor)) == 0){
+      if (strncmp(conf->target, "user", 4) == 0){
+
+        if (conf->param){
+          if (cur)
+            cur->next = push_access(cur, conf->param);
+          else
+            cur = push_access(cur, conf->param);
+
+          blog(cur, " cur");
+          if (ret == NULL)
+            ret = cur;
+        }
+        else
+            slog(1, "access_open: can't allocate memory...");
+      }
+    }
+    conf = conf->next;
+  }
+  return ret;
+}
+
 
 void push(node_t *head, int index, char *service, char *option, char *target, char *param) {
     node_t *cur = head;
@@ -139,9 +218,9 @@ int remove_by_index(node_t ** head, int n) {
     return retval;
 }
 
-int remove_by_service(node_t ** head, char *service)
+int remove_by_service(node_t *head, char *service)
 {
-  node_t *cur = *head;
+  node_t *cur = head;
   if (cur == NULL) return -1;
 
   while (cur->next != NULL) {
@@ -155,9 +234,8 @@ int remove_by_service(node_t ** head, char *service)
       cur->param  = cur->next->param;
       cur->next   = cur->next->next;
     }
-    else {
+    else
       cur = cur->next;
-    }
   }
   return 0;
 }
@@ -205,6 +283,10 @@ void get_config(node_t *head, char *user, char *service)
     }
   }
   fclose(stream);
+  free(conf_line[0]);
+  free(conf_line[1]);
+  free(conf_line[2]);
+  free(conf_line[3]);
   //pop(&head);
   //remove_by_service(&head, service);
 
@@ -245,11 +327,13 @@ void get_default(settings_t *def)
     if (strncmp("MAILSERVER", pch, 10) == 0) {
       pch = strtok (NULL, ":");
       def->MAILSERVER = strdup(pch);
+      rmn(def->MAILSERVER);
     }
 
     if (strncmp("DEFAULT", pch, 7) == 0) {
       pch = strtok (NULL, ":");
       def->DEFAULT = strdup(pch);
+      rmn(def->DEFAULT);
     }
 
     if (strncmp("DEBUG", pch, 5) == 0) {
@@ -260,6 +344,8 @@ void get_default(settings_t *def)
          (strncmp("TRUE", debug, 4) == 0) ||
          (strncmp("true", debug, 4) == 0))
         def->DEBUG = 1;
+
+      free(debug);
     }
   }
   fclose(stream);

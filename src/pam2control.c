@@ -32,9 +32,46 @@
 
 void print_list(node_t *);
 void get_default(settings_t *);
-int  get_config(node_t *, char *, char *);
+int  get_config(node_t *conf, char *, char *);
 void slog(int number, ...);
+void blog(void *address, char *str);
 void make_log_prefix(char *service, char *user);
+int remove_by_service(node_t *, char *service);
+access_t *create_access(access_t *access_open, char *flavor, node_t *conf);
+void print_access(access_t *access_open, char *flavor);
+
+const int *DEBUG;
+
+void rmn(char *str)
+{
+  if (str == NULL)
+    return;
+  int length = strlen(str);
+  if (str[length-1] == '\n')
+    str[length-1] = '\0';
+}
+
+int user_list_checker(access_t *LIST, char *user)
+{
+  if (LIST) {
+    slog(1,"after show");
+    while(LIST){
+      rmn(user);
+      rmn(LIST->user);
+      slog(3, "LIST->user -> '", LIST->user, "'");
+      slog(3, "user -> '", user, "'");
+
+      if (strncmp(LIST->user, user, strlen(user)) == 0) {
+        slog(1, "SAME");
+        return 1;
+      }
+      slog(1, "NOT SAME, NEXT...");
+      LIST = LIST->next;
+    }
+  }
+  slog(1,"EXIT");
+  return 0;
+}
 
 
 int allow(pam_handle_t *pamh, char *service, char *user)
@@ -47,14 +84,13 @@ int allow(pam_handle_t *pamh, char *service, char *user)
   }
 
   get_default(def);
+  DEBUG = def->DEBUG;
 
-  slog(3, "p2c: DEFAULT is set to ", def->DEFAULT, "'");
-  slog(3, "p2c: MAILSER is set to '", def->MAILSERVER, "'");
-
-  if (def->DEBUG)
-    slog(1, "p2c: DEBUG is set to TRUE");
-  else
-    slog(1, "p2c: DEBUG is set to FALSE");
+  if (DEBUG) {
+    slog(3, "p2c: DEFAULT - '", def->DEFAULT, "'");
+    slog(1, "p2c: DEBUG   - 'TRUE'");
+    slog(3, "p2c: MAILSER - '", def->MAILSERVER, "'");
+  }
 
   node_t *conf = NULL;
   conf = malloc(sizeof(node_t));
@@ -64,17 +100,41 @@ int allow(pam_handle_t *pamh, char *service, char *user)
   }
   
   get_config(conf, user, service);
-  slog(1, "I got node_t");
-
-  if (def->DEBUG && conf) {
+  if (DEBUG && conf) {
     slog(1, "SHOW CONF");
     print_list(conf);
   }
 
-  if (strncmp(def->DEFAULT, "OPEN", 4) == 0)
-    return PAM_SUCCESS;
-  else
+  remove_by_service(conf, service);
+
+  if (DEBUG) {
+    slog(3,"--- ", service, " ------------------");
+    print_list(conf);
+  }
+
+  access_t *OPEN  = NULL;
+  access_t *CLOSE = NULL;
+  OPEN  = create_access(OPEN,  "open",  conf);
+  CLOSE = create_access(CLOSE, "close", conf);
+
+  if (DEBUG) {
+    print_access(OPEN, "OPEN");
+    print_access(CLOSE,"CLOSE");
+    slog(1,"=============================");
+  }
+
+  if (user_list_checker(CLOSE, user))
     return PAM_AUTH_ERR;
+
+  if (user_list_checker(OPEN, user))
+    return PAM_SUCCESS;
+
+  /* DEFAULT RULE */
+  if ((strncmp(def->DEFAULT, "OPEN",  4) == 0) ||
+      (strncmp(def->DEFAULT, "open",  4) == 0))
+    return PAM_SUCCESS;
+
+  return PAM_AUTH_ERR;
 }
 
 
