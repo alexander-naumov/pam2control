@@ -84,11 +84,10 @@ int allow(pam_handle_t *pamh, char *service, char *user)
   }
 
   get_default(def);
-  DEBUG = def->DEBUG;
 
   if (DEBUG) {
     slog(3, "p2c: DEFAULT - '", def->DEFAULT, "'");
-    slog(1, "p2c: DEBUG   - 'TRUE'");
+/*  slog(1, "p2c: DEBUG   - 'TRUE'"); */
     slog(3, "p2c: MAILSER - '", def->MAILSERVER, "'");
   }
 
@@ -158,6 +157,11 @@ int pam_sm_authenticate(pam_handle_t *pamh, int flags, int argc, const char **ar
   make_log_prefix(service, user);
   slog(1, "==== authentication phase =====================");
 
+  for (int i = 0; i<argc; i++)
+  {
+    if ((argv[i]) && (strncmp(argv[i],"debug",5) == 0))
+      DEBUG = 1;
+  }
   if (strstr(host,"::1"))
     host = "localhost";
   

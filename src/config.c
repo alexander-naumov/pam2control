@@ -141,7 +141,7 @@ access_t *create_access(access_t *cur, char *flavor, node_t* conf)
     if (strncmp(conf->option, flavor, strlen(flavor)) == 0){
       if (strncmp(conf->target, "user", 4) == 0){
 
-        if (conf->param){
+        if (conf->param){ /* FIXME */
           if (cur)
             cur->next = push_access(cur, conf->param);
           else
@@ -260,7 +260,7 @@ void get_config(node_t *head, char *user, char *service)
   while ((getline(&line, &len, stream)) != -1) {
     if ((line[0] == '#')                     ||
         (strlen(line) < 9)                   ||
-        (strncmp("DEBUG", line, 5) == 0)     ||
+   /*   (strncmp("DEBUG", line, 5) == 0)     || */
         (strncmp("DEFAULT", line, 7) == 0)   ||
         (strncmp("MAILSERVER", line, 10) == 0))
       continue;
@@ -306,9 +306,9 @@ void get_default(settings_t *def)
   FILE *stream;
   char *line = NULL;
   char *pch;
-  char *debug;
+/*char *debug;*/
 
-  def->DEBUG = 0;
+/*def->DEBUG = 0;*/
   def->MAILSERVER = NULL;
   def->DEFAULT = "CLOSE";
 
@@ -336,6 +336,7 @@ void get_default(settings_t *def)
       rmn(def->DEFAULT);
     }
 
+/*
     if (strncmp("DEBUG", pch, 5) == 0) {
       pch = strtok (NULL, ":");
       debug = strdup(pch);
@@ -347,6 +348,7 @@ void get_default(settings_t *def)
 
       free(debug);
     }
+*/
   }
   fclose(stream);
 }
