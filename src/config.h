@@ -32,7 +32,6 @@ typedef struct access {
 
 typedef struct settings {
     char *DEFAULT;
-    int   DEBUG;
     char *MAILSERVER;
 } settings_t;
 
