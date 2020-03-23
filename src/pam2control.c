@@ -40,7 +40,7 @@ void       make_log_prefix(char *, char *);
 int        remove_by_service(node_t *, char *);
 access_t * create_access(access_t *, char *, node_t *);
 
-int DEBUG;
+int DEBUG = 0;
 
 void rmn(char *str)
 {
