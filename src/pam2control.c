@@ -87,7 +87,6 @@ int allow(pam_handle_t *pamh, char *service, char *user)
 
   if (DEBUG) {
     slog(3, "p2c: DEFAULT - '", def->DEFAULT, "'");
-/*  slog(1, "p2c: DEBUG   - 'TRUE'"); */
     slog(3, "p2c: MAILSER - '", def->MAILSERVER, "'");
   }
 
