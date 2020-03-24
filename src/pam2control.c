@@ -93,15 +93,8 @@ allow(pam_handle_t *pamh, char *service, char *user)
 
   node_t *conf = NULL;
   conf = get_config(conf, user, service);
-  if (DEBUG && conf) {
-    slog(1, "SHOW CONF");
+  if (DEBUG && conf)
     print_list(conf);
-  }
-
-  if (DEBUG) {
-    slog(3,"--- ", service, " ------------------");
-    print_list(conf);
-  }
 
   access_t *OPEN  = NULL;
   access_t *CLOSE = NULL;
