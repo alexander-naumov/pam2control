@@ -41,7 +41,8 @@ access_t * create_access(access_t *, char *, char *, node_t *);
 
 int DEBUG = 0;
 
-void rmn(char *str)
+void
+rmn(char *str)
 {
   if (str == NULL)
     return;
@@ -50,7 +51,8 @@ void rmn(char *str)
     str[length-1] = '\0';
 }
 
-int user_list_checker(access_t *LIST, char *user)
+int
+user_list_checker(access_t *LIST, char *user)
 {
   if (LIST) {
     while(LIST){
@@ -72,7 +74,8 @@ int user_list_checker(access_t *LIST, char *user)
 }
 
 
-int allow(pam_handle_t *pamh, char *service, char *user)
+int
+allow(pam_handle_t *pamh, char *service, char *user)
 {
   settings_t *def = NULL;
   def = malloc(sizeof(settings_t));
@@ -128,14 +131,16 @@ int allow(pam_handle_t *pamh, char *service, char *user)
 }
 
 
-int pam_sm_open_session(pam_handle_t *pamh, int flags, int argc, const char **argv)
+int
+pam_sm_open_session(pam_handle_t *pamh, int flags, int argc, const char **argv)
 {
   slog(1, "==== open new session =========================");
   return PAM_SUCCESS;
 }
 
 
-int pam_sm_authenticate(pam_handle_t *pamh, int flags, int argc, const char **argv)
+int
+pam_sm_authenticate(pam_handle_t *pamh, int flags, int argc, const char **argv)
 {
   char *service = NULL;
   char *user = NULL;
@@ -160,13 +165,15 @@ int pam_sm_authenticate(pam_handle_t *pamh, int flags, int argc, const char **ar
 }
 
 
-int pam_sm_setcred(pam_handle_t *pamh, int flags, int argc, const char **argv)
+int
+pam_sm_setcred(pam_handle_t *pamh, int flags, int argc, const char **argv)
 {
   return PAM_SUCCESS;
 }
 
 
-int pam_sm_close_session(pam_handle_t *pamh, int flags, int argc, const char **argv)
+int
+pam_sm_close_session(pam_handle_t *pamh, int flags, int argc, const char **argv)
 {
   slog(1, "==== closing session ==========================");
   return PAM_SUCCESS;

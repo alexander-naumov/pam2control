@@ -35,7 +35,8 @@ void    ilog(int, char *);
 char *  make_log_prefix(char *, char *);
 void    rmn(char *);
 
-int length(struct node* head)
+int
+length(struct node* head)
 {
   struct node* current = head;
   int count = 0;
@@ -47,7 +48,8 @@ int length(struct node* head)
 }
 
 
-void print_access(access_t *LIST, char *flavor)
+void
+print_access(access_t *LIST, char *flavor)
 {
   slog(3, "==== ACCESS ", flavor, " ===========");
   if (LIST == NULL) {
@@ -61,7 +63,8 @@ void print_access(access_t *LIST, char *flavor)
   }
 }
 
-void print_list(node_t *cur)
+void
+print_list(node_t *cur)
 {
   char *log_node = NULL;
 
@@ -108,7 +111,8 @@ void print_list(node_t *cur)
 }
 
 
-access_t *push_access(access_t *head, char *user)
+access_t *
+push_access(access_t *head, char *user)
 {
   access_t *cur = NULL;
   cur = malloc(sizeof(access_t));
@@ -130,7 +134,8 @@ access_t *push_access(access_t *head, char *user)
 }
 
 
-access_t *create_access(access_t *cur, char *flavor, char *service, node_t* conf)
+access_t *
+create_access(access_t *cur, char *flavor, char *service, node_t* conf)
 {
   while(conf) {
     if (strncmp(conf->service, service, strlen(service)) == 0){
@@ -149,7 +154,8 @@ access_t *create_access(access_t *cur, char *flavor, char *service, node_t* conf
 }
 
 
-node_t *push(node_t *head, int index, char *service, char *option, char *target, char *param) {
+node_t *
+push(node_t *head, int index, char *service, char *option, char *target, char *param) {
     node_t *cur = NULL;
     cur = malloc(sizeof(node_t));
     if (cur) {
@@ -175,7 +181,8 @@ node_t *push(node_t *head, int index, char *service, char *option, char *target,
     return head;
 }
 
-node_t *get_config(node_t *head, char *user, char *service)
+node_t *
+get_config(node_t *head, char *user, char *service)
 {
   node_t *ret = NULL;
   char *pch;
@@ -219,7 +226,8 @@ node_t *get_config(node_t *head, char *user, char *service)
 }
 
 
-void get_default(settings_t *def)
+void
+get_default(settings_t *def)
 {
   size_t len = 0;
   FILE *stream;
