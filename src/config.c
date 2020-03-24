@@ -138,15 +138,12 @@ access_t *
 create_access(access_t *cur, char *flavor, char *service, node_t* conf)
 {
   while(conf) {
-    if (strncmp(conf->service, service, strlen(service)) == 0){
-      if (strncmp(conf->option, flavor, strlen(flavor)) == 0){
-        if (strncmp(conf->target, "user", 4) == 0){
-          if (conf->param){
+    if ((!strncmp(conf->service, service, strlen(service))) &&
+        (!strncmp(conf->option, flavor, strlen(flavor)))    &&
+        (!strncmp(conf->target, "user", 4))){
+
+          if (conf->param)
             cur = push_access(cur, conf->param);
-            blog(cur, " cur");
-          }
-        }
-      }
     }
     conf = conf->next;
   }
