@@ -70,8 +70,7 @@ void print_list(node_t *cur)
   char *cur_target = "\nTarget:    ";
   char *cur_param  = "\nParameters:";
 
-  while (cur->next) {
-    blog(&cur->next -1, "");
+  while (cur != NULL) {
     log_node = malloc(
 	  strlen(cur_service) +
 	  strlen(cur_option) +
@@ -96,153 +95,89 @@ void print_list(node_t *cur)
 	  strcat(log_node, cur_param);
 	  strcat(log_node, cur->param);
     }
-    slog(1, log_node);
-    slog(1, "----");
-    cur = cur->next;
+    else
+      slog(1,"something goes wrong");
+
+
+    if (cur->next != NULL)
+      cur = cur->next;
+    else
+      return;
   }
-  free(log_node);
+    free(log_node);
 }
 
 
-access_t *push_access(access_t *cur, char *user)
+access_t *push_access(access_t *head, char *user)
 {
-  slog(1, "=============================");
-  blog(cur, "push_access");
-
-  if (cur != NULL) {
-    slog(1,"access_open != NULL");
-    cur = cur->next;
-  }
-
-  if (cur == NULL) {
-      slog(1, "access_open == NULL");
-      cur = malloc(sizeof(access_t));
-      if (cur)
-        blog(cur, " <- new address from malloc");
-      else
-        slog(1, "Error by parsing access: can't allocate memory...");
-  }
-
+  access_t *cur = NULL;
+  cur = malloc(sizeof(access_t));
   if (cur) {
-        slog(2,"CREATE NEW access_open struct -> ", user);
-        cur->user = user;
-        cur->next = NULL;
+    cur->user = user;
+    cur->next = NULL;
+  }
+
+  if (head) {
+    while (head->next != NULL) {
+      head = head->next;
+    }
+    head->next = cur;
+  }
+  else
+    head = cur;
+
+  return head;
+}
+
+
+access_t *create_access(access_t *cur, char *flavor, char *service, node_t* conf)
+{
+  while(conf) {
+    if (strncmp(conf->service, service, strlen(service)) == 0){
+      if (strncmp(conf->option, flavor, strlen(flavor)) == 0){
+        if (strncmp(conf->target, "user", 4) == 0){
+          if (conf->param){
+            cur = push_access(cur, conf->param);
+            blog(cur, " cur");
+          }
+        }
+      }
+    }
+    conf = conf->next;
   }
   return cur;
 }
 
 
-access_t *create_access(access_t *cur, char *flavor, node_t* conf)
-{
-  access_t *ret = cur;
-  blog(cur, " &cur CREATE_ACCESS");
-
-  while(conf->next) {
-    if (strncmp(conf->option, flavor, strlen(flavor)) == 0){
-      if (strncmp(conf->target, "user", 4) == 0){
-
-        if (conf->param){ /* FIXME */
-          if (cur)
-            cur->next = push_access(cur, conf->param);
-          else
-            cur = push_access(cur, conf->param);
-
-          blog(cur, " cur");
-          if (ret == NULL)
-            ret = cur;
-        }
-        else
-            slog(1, "access_open: can't allocate memory...");
-      }
-    }
-    conf = conf->next;
-  }
-  return ret;
-}
-
-
-void push(node_t *head, int index, char *service, char *option, char *target, char *param) {
-    node_t *cur = head;
-    while (cur->next != NULL) {
-      cur = cur->next;
-    }
-    cur->next = malloc(sizeof(node_t));
-    if (cur->next) {
-      cur->next->index   = index;
-      cur->next->service = service;
-      cur->next->option  = option;
-      cur->next->target  = target;
-      cur->next->param   = param;
-      cur->next->next    = NULL;
+node_t *push(node_t *head, int index, char *service, char *option, char *target, char *param) {
+    node_t *cur = NULL;
+    cur = malloc(sizeof(node_t));
+    if (cur) {
+      cur->index   = index;
+      cur->service = service;
+      cur->option  = option;
+      cur->target  = target;
+      cur->param   = param;
+      cur->next    = NULL;
     }
     else
       slog(1, "Error by parsing config: can't allocate memory...");
-}
 
-int pop(node_t ** head) {
-    int retval = -1;
-    node_t * next_node = NULL;
-
-    if (*head == NULL) {
-        return -1;
-    }
-
-    next_node = (*head)->next;
-    retval = (*head)->index;
-    free(*head);
-    *head = next_node;
-
-    return retval;
-}
-
-int remove_by_index(node_t ** head, int n) {
-    int retval = -1;
-    node_t * cur = *head;
-    node_t * temp_node = NULL;
-
-    if (n == 0) {
-        return pop(head);
-    }
-    for (int i = 0; i < n-1; i++) {
-        if (cur->next == NULL) {
-            return -1;
-	}
-        cur = cur->next;
-    }
-    //printf("index %d = %p\n", cur->index, (void *)&cur->index);
-    temp_node = cur->next;
-    retval = temp_node->index;
-    cur->next = temp_node->next;
-    free(temp_node);
-
-    return retval;
-}
-
-int remove_by_service(node_t *head, char *service)
-{
-  node_t *cur = head;
-  if (cur == NULL) return -1;
-
-  while (cur->next != NULL) {
-    if (strcmp(cur->service, service) != 0) {
-      printf("index %d \n", cur->index);
-      
-      cur->index  = cur->next->index;
-      cur->service= cur->next->service;
-      cur->option = cur->next->option;
-      cur->target = cur->next->target;
-      cur->param  = cur->next->param;
-      cur->next   = cur->next->next;
+    if (head) {
+      while (head->next != NULL) {
+        head = head->next;
+      }
+      head->next = cur;
     }
     else
-      cur = cur->next;
-  }
-  return 0;
+      head = cur;
+
+    return head;
 }
 
-
-void get_config(node_t *head, char *user, char *service)
+node_t *get_config(node_t *head, char *user, char *service)
 {
+  node_t *ret = NULL;
   char *pch;
   char *conf_line[4] = {NULL, NULL, NULL, NULL};
   int i,index = 0;
@@ -272,30 +207,15 @@ void get_config(node_t *head, char *user, char *service)
       i++;
     }
     if (conf_line[0] && conf_line[1] && conf_line[2] && conf_line[3]) {
-      head->index   = index;
-      head->service = conf_line[0];
-      head->option  = conf_line[1];
-      head->target  = conf_line[2];
-      head->param   = conf_line[3];
-      push(head, head->index, head->service, head->option, head->target, head->param);
+      head = push(head, index, conf_line[0], conf_line[1], conf_line[2], conf_line[3]);
+      if (!ret)
+        ret = head;
       index++;
     }
   }
   fclose(stream);
-  free(conf_line[0]);
-  free(conf_line[1]);
-  free(conf_line[2]);
-  free(conf_line[3]);
-  //pop(&head);
-  //remove_by_service(&head, service);
-
-  //printf("length = %d\n", length(head)); 
-  //printf("---------------------------\n");
-
-  //print_list(head);
   free(line);
-  //free(head);
-  //return head;
+  return ret;
 }
 
 

@@ -33,12 +33,11 @@
 void       print_list(node_t *);
 void       print_access(access_t *, char *);
 void       get_default(settings_t *);
-int        get_config(node_t *, char *, char *);
+node_t *   get_config(node_t *, char *, char *);
 void       slog(int number, ...);
 void       blog(void *, char *);
 void       make_log_prefix(char *, char *);
-int        remove_by_service(node_t *, char *);
-access_t * create_access(access_t *, char *, node_t *);
+access_t * create_access(access_t *, char *, char *, node_t *);
 
 int DEBUG = 0;
 
@@ -54,7 +53,6 @@ void rmn(char *str)
 int user_list_checker(access_t *LIST, char *user)
 {
   if (LIST) {
-    slog(1,"after show");
     while(LIST){
       rmn(user);
       rmn(LIST->user);
@@ -91,19 +89,11 @@ int allow(pam_handle_t *pamh, char *service, char *user)
   }
 
   node_t *conf = NULL;
-  conf = malloc(sizeof(node_t));
-  if (conf == NULL){
-    slog(1, "error, can't allocate memory");
-    exit(1);
-  }
-  
-  get_config(conf, user, service);
+  conf = get_config(conf, user, service);
   if (DEBUG && conf) {
     slog(1, "SHOW CONF");
     print_list(conf);
   }
-
-  remove_by_service(conf, service);
 
   if (DEBUG) {
     slog(3,"--- ", service, " ------------------");
@@ -112,14 +102,16 @@ int allow(pam_handle_t *pamh, char *service, char *user)
 
   access_t *OPEN  = NULL;
   access_t *CLOSE = NULL;
-  OPEN  = create_access(OPEN,  "open",  conf);
-  CLOSE = create_access(CLOSE, "close", conf);
+  OPEN  = create_access(OPEN,  "open",  service, conf);
+  CLOSE = create_access(CLOSE, "close", service, conf);
+
 
   if (DEBUG) {
     print_access(OPEN, "OPEN");
     print_access(CLOSE,"CLOSE");
     slog(1,"=============================");
   }
+
 
   if (user_list_checker(CLOSE, user))
     return PAM_AUTH_ERR;
