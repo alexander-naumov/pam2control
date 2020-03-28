@@ -20,6 +20,8 @@ pam2control: $(OBJ)
 
 install:
 	install -m 755 pam2control.so $(LIB_PATH)/security/
+	mkdir -p /etc/pam2control
+	install -m 600 p2c.conf.default /etc/pam2control/
 
 clean:
 	rm -f $(OBJ)
