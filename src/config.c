@@ -25,6 +25,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <syslog.h>
+#include <grp.h>
 
 #include "config.h"
 #include "pam2control.h"
@@ -111,6 +112,27 @@ print_list(node_t *cur)
 }
 
 
+char **
+get_user_list_group(const char *name)
+{
+  int errno = 0;
+  struct group *grp = NULL;
+
+  if (name == NULL || *name == '\0')
+    slog(1, "wrong group name...");
+
+  grp = getgrnam(name);
+  if (grp == NULL) {
+    if (errno == 0)
+      slog(3, "can't find group '", name, "'");
+    else
+      slog(1, "something goes wrong by getting group info");
+    return NULL;
+  }
+  return grp->gr_mem;
+}
+
+
 access_t *
 push_access(access_t *head, char *user)
 {
@@ -141,10 +163,26 @@ create_access(access_t *head, char *flavor, char *service, node_t* conf)
   while(conf) {
     if ((!strncmp(conf->service, service, strlen(service))) &&
         (!strncmp(conf->option, flavor, strlen(flavor)))    &&
-        (!strncmp(conf->target, "user", 4))){
+        (conf->param)){
 
-          if (conf->param)
+          if (!strncmp(conf->target, "user", 4))
             cur = push_access(cur, conf->param);
+
+          if (!strncmp(conf->target, "group", 5)){
+            rmn(conf->param);
+            char **user_list = get_user_list_group(conf->param);
+
+            if (user_list)
+              while (*user_list != NULL) {
+                char *name = malloc(strlen(*user_list) + 1);
+                strcpy(name, *user_list);
+                cur = push_access(cur, name);
+                user_list++;
+              }
+            else
+              slog(3, "group '", conf->param, "' is empty");
+          }
+
     }
     if (!head)
       head = cur;
