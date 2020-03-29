@@ -135,8 +135,9 @@ push_access(access_t *head, char *user)
 
 
 access_t *
-create_access(access_t *cur, char *flavor, char *service, node_t* conf)
+create_access(access_t *head, char *flavor, char *service, node_t* conf)
 {
+  access_t *cur = NULL;
   while(conf) {
     if ((!strncmp(conf->service, service, strlen(service))) &&
         (!strncmp(conf->option, flavor, strlen(flavor)))    &&
@@ -145,9 +146,11 @@ create_access(access_t *cur, char *flavor, char *service, node_t* conf)
           if (conf->param)
             cur = push_access(cur, conf->param);
     }
+    if (!head)
+      head = cur;
     conf = conf->next;
   }
-  return cur;
+  return head;
 }
 
 
