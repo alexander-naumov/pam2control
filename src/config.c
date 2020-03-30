@@ -193,11 +193,10 @@ create_access(access_t *head, char *flavor, char *service, node_t* conf)
 
 
 node_t *
-push(node_t *head, int index, char *service, char *option, char *target, char *param) {
+push(node_t *head, char *service, char *option, char *target, char *param) {
     node_t *cur = NULL;
     cur = malloc(sizeof(node_t));
     if (cur) {
-      cur->index   = index;
       cur->service = service;
       cur->option  = option;
       cur->target  = target;
@@ -225,7 +224,7 @@ get_config(node_t *head, char *user, char *service)
   node_t *ret = NULL;
   char *pch;
   char *conf_line[4] = {NULL, NULL, NULL, NULL};
-  int i,index = 0;
+  int i = 0;
 
   FILE *stream;
   char *line = NULL;
@@ -252,10 +251,9 @@ get_config(node_t *head, char *user, char *service)
       i++;
     }
     if (conf_line[0] && conf_line[1] && conf_line[2] && conf_line[3]) {
-      head = push(head, index, conf_line[0], conf_line[1], conf_line[2], conf_line[3]);
+      head = push(head, conf_line[0], conf_line[1], conf_line[2], conf_line[3]);
       if (!ret)
         ret = head;
-      index++;
     }
   }
   fclose(stream);

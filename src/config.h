@@ -36,7 +36,6 @@ typedef struct settings {
 } settings_t;
 
 typedef struct node {
-    int    index;
     char  *service;
     char  *option;
     char  *target;
