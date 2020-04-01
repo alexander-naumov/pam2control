@@ -30,6 +30,8 @@
 #include "config.h"
 #include "log.h"
 
+
+int        history(char *, char *, char *, char *, char *);
 void       print_list(node_t *);
 void       print_access(access_t *, char *);
 void       get_default(settings_t *);
@@ -75,7 +77,7 @@ user_list_checker(access_t *LIST, char *user)
 
 
 int
-allow(pam_handle_t *pamh, char *service, char *user)
+allow(pam_handle_t *pamh, char *service, char *user, char* host)
 {
   settings_t *def = NULL;
   def = malloc(sizeof(settings_t));
@@ -89,6 +91,7 @@ allow(pam_handle_t *pamh, char *service, char *user)
   if (DEBUG) {
     slog(3, "p2c: DEFAULT - '", def->DEFAULT, "'");
     slog(3, "p2c: MAILSER - '", def->MAILSERVER, "'");
+    slog(3, "p2c: LOGFILE - '", def->LOGFILE, "'");
   }
 
   node_t *conf = NULL;
@@ -127,6 +130,13 @@ allow(pam_handle_t *pamh, char *service, char *user)
 int
 pam_sm_open_session(pam_handle_t *pamh, int flags, int argc, const char **argv)
 {
+  char *user    = NULL;
+  char *service = NULL;
+
+  (void) pam_get_user(pamh, (const char **) &user, NULL);
+  (void) pam_get_item(pamh, PAM_SERVICE, (const void **) &service);
+
+  make_log_prefix(service, user);
   slog(1, "==== open new session =========================");
   return PAM_SUCCESS;
 }
@@ -135,9 +145,11 @@ pam_sm_open_session(pam_handle_t *pamh, int flags, int argc, const char **argv)
 int
 pam_sm_authenticate(pam_handle_t *pamh, int flags, int argc, const char **argv)
 {
+  int ret = PAM_AUTH_ERR;
+
   char *service = NULL;
-  char *user = NULL;
-  char *host = NULL;
+  char *user    = NULL;
+  char *host    = NULL;
 
   (void) pam_get_user(pamh, (const char **) &user, NULL); 
   (void) pam_get_item(pamh, PAM_SERVICE, (const void **) &service);
@@ -153,8 +165,17 @@ pam_sm_authenticate(pam_handle_t *pamh, int flags, int argc, const char **argv)
   }
   if (strstr(host,"::1"))
     host = "localhost";
-  
-  return allow(pamh, service, user);
+
+
+  ret = allow(pamh, service, user, host);
+
+  if (ret == PAM_SUCCESS){
+    history(service, "OPEN", host, user, "access granted");
+    return PAM_SUCCESS;
+  }
+
+  history(service, "CLOSE", host, user, "access denied");
+  return ret;
 }
 
 
@@ -168,7 +189,29 @@ pam_sm_setcred(pam_handle_t *pamh, int flags, int argc, const char **argv)
 int
 pam_sm_close_session(pam_handle_t *pamh, int flags, int argc, const char **argv)
 {
+  char *user    = NULL;
+  char *service = NULL;
+  char *host    = NULL;
+
+  (void) pam_get_user(pamh, (const char **) &user, NULL);
+  (void) pam_get_item(pamh, PAM_SERVICE, (const void **) &service);
+  (void) pam_get_item(pamh, PAM_RHOST, (const void **) &host);
+
+  make_log_prefix(service, user);
   slog(1, "==== closing session ==========================");
+
+
+  if (strstr(host,"::1"))
+    host = "localhost";
+
+  settings_t *def = NULL;
+  def = malloc(sizeof(settings_t));
+  if (def == NULL) {
+    slog(1, "error, can't allocate memory");
+    exit(1);
+  }
+  get_default(def);
+  history(service, "OPEN", host, user, "closing session");
   return PAM_SUCCESS;
 }
 

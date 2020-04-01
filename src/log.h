@@ -22,5 +22,6 @@
 #ifndef LOG_H
 #define LOG_H
 
-extern char *log_p;
+extern char *log_proc;
+extern char *log_path;
 #endif

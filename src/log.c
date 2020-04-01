@@ -20,25 +20,30 @@
  */
 
 #define _GNU_SOURCE
+#include<sys/stat.h>
+#include<fcntl.h>
 #include<stdio.h>
 #include<syslog.h>
 #include<string.h>
 #include<stdlib.h>
 #include<stdarg.h>
+#include<errno.h>
+#include<time.h>
 
-const char *log_p;
+const char *log_path;
+const char *log_proc;
 
 void
 ilog(int number, char *str)
 {
-  openlog (log_p, LOG_CONS | LOG_PID | LOG_NDELAY, LOG_LOCAL1);
+  openlog (log_proc, LOG_CONS | LOG_PID | LOG_NDELAY, LOG_LOCAL1);
   syslog (LOG_INFO, "%d %s", number, str);
 }
 
 void
 blog(void *address, char *str)
 {
-  openlog (log_p, LOG_CONS | LOG_PID | LOG_NDELAY, LOG_LOCAL1);
+  openlog (log_proc, LOG_CONS | LOG_PID | LOG_NDELAY, LOG_LOCAL1);
   syslog (LOG_INFO, "%p %s", address, str);
 }
 
@@ -69,9 +74,59 @@ slog(int arg_count, ...)
         strcat(LOG, str);
     }
   }
-  openlog (log_p, LOG_CONS | LOG_PID | LOG_NDELAY, LOG_LOCAL1);
+  openlog (log_proc, LOG_CONS | LOG_PID | LOG_NDELAY, LOG_LOCAL1);
   syslog (LOG_INFO, LOG);
   free(LOG);
+}
+
+
+int
+history(char *service, char *access, char *host, char *user, char *msg)
+{
+  FILE *fp;
+  time_t t;
+  struct tm *tm;
+  char *date;
+  char *logfile;
+
+  t = time(NULL);
+  tm = localtime(&t);
+  if (tm == NULL)
+    return 1;
+
+  strftime(date, 24, "-%Y-%m.log", tm);
+  logfile = (char *)malloc(strlen(log_path) + strlen(date) + 1);
+  if (logfile) {
+    strcpy (logfile, log_path);
+    strcat (logfile, date);
+  }
+  else {
+    slog(1,"can't allocate memory for logfile entry");
+    return 1;
+  }
+
+  if ((fp = fopen(logfile, "a")) == NULL) {
+    slog(1, "can't open logfile...");
+    if (errno == EROFS)
+      slog(1, "logfile is on read only FS");
+    if (errno == ENOENT)
+      slog(1, "bad PATH of logfile");
+    return 1;
+  }
+
+  strftime(date, 64, "%c", tm);
+  if (fprintf(fp, "%-28s %-8s %-5s %10s@%-15s %-20s\n",  date, service, access, user, host, msg) < 0) {
+    slog(1, "something goes wrong by put info to the logfile");
+    return 1;
+  }
+
+  if (fclose(fp) != 0) {
+    slog(1, "something goes wrong by closing file");
+    return 1;
+  }
+
+  free(logfile);
+  return 0;
 }
 
 
@@ -97,6 +152,6 @@ make_log_prefix(char *service, char *user)
         strcat (log_prefix, user);
         strcat (log_prefix, end);
   }
-  log_p = log_prefix;
+  log_proc = log_prefix;
 }
 

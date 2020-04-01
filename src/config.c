@@ -36,6 +36,8 @@ void    ilog(int, char *);
 char *  make_log_prefix(char *, char *);
 void    rmn(char *);
 
+const char *log_path;
+
 int
 length(struct node* head)
 {
@@ -272,6 +274,7 @@ get_default(settings_t *def)
 
   def->MAILSERVER = NULL;
   def->DEFAULT = "CLOSE";
+  def->LOGFILE = "/var/log/pam2control/p2c";
 
   stream = fopen(CONFFILE, "r");
   if (stream == NULL) {
@@ -296,6 +299,13 @@ get_default(settings_t *def)
       def->DEFAULT = strdup(pch);
       rmn(def->DEFAULT);
     }
+
+    if (strncmp("LOGFILE", pch, 7) == 0) {
+      pch = strtok (NULL, ":");
+      def->LOGFILE = strdup(pch);
+      rmn(def->LOGFILE);
+    }
+    log_path = def->LOGFILE;
   }
   fclose(stream);
 }
