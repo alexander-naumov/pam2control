@@ -1,14 +1,13 @@
 # pam2control
 [![Build Status](https://travis-ci.org/alexander-naumov/pam2control.svg?branch=master)](https://travis-ci.org/alexander-naumov/pam2control)
 
+pam2control is the easily configurable system to control access to host via PAM interfaces.
+It makes it possible to manages access for some user or group of users by adding just
+one line to the config file.
+It uses syslog and also its own logfile for every login-/logout-events.
 
-Yet another PAM project implemented in C and developed for fun.
+It's implemented in C and right now in an early stage of development.
 
-pam2control is an amazing world of the memory leaks, collections of NULL
-pointers and, of course, doors to nowhere... extremely surprising and very
-impressive things heppen here.
-Wanna have a lot of fun? Ready for adventure? Сome with me and I will
-show you how deep is this rabbit hole ;-)
 
 Credits
 -------
