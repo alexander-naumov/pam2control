@@ -35,7 +35,7 @@ void  debug(int, ...);
 void  debug_addr(void *, char *);
 void  debug_int(int, char *);
 char *make_log_prefix(char *, char *);
-void  rmn(char *);
+char *rmn(char *);
 
 const char *log_path;
 
@@ -78,7 +78,7 @@ print_list(node_t *cur)
   char *cur_param  = "\nParameters:";
 
   while (cur != NULL) {
-    log_node = malloc(
+    log_node = (char *)malloc(
 	  strlen(cur_service) +
 	  strlen(cur_option) +
 	  strlen(cur_target) +
@@ -103,15 +103,17 @@ print_list(node_t *cur)
 	  strcat(log_node, cur->param);
     }
     else
-      slog(1,"something goes wrong");
+      debug(1,"conf: print_list, can't allocate memory");
 
+    debug(1, log_node);
+    debug(1,"-------------");
 
     if (cur->next != NULL)
       cur = cur->next;
     else
       return;
   }
-    free(log_node);
+  free(log_node);
 }
 
 
@@ -140,15 +142,20 @@ access_t *
 push_access(access_t *head, char *user)
 {
   access_t *cur = NULL;
-  cur = malloc(sizeof(access_t));
+  cur = (access_t *)malloc(sizeof(access_t));
   if (cur) {
     cur->user = user;
     cur->next = NULL;
+    debug_addr(cur, " <- cur");
+    debug(2, "cur->user =        ", rmn(cur->user));
   }
+  else
+    slog(1, "can't allocate memory...");
 
   if (head) {
     while (head->next != NULL) {
       head = head->next;
+      debug_addr(head, " <- head");
     }
     head->next = cur;
   }
@@ -172,12 +179,11 @@ create_access(access_t *head, char *flavor, char *service, node_t* conf)
             cur = push_access(cur, conf->param);
 
           if (!strncmp(conf->target, "group", 5)){
-            rmn(conf->param);
-            char **user_list = get_user_list_group(conf->param);
+            char **user_list = get_user_list_group(rmn(conf->param));
 
             if (user_list)
               while (*user_list != NULL) {
-                char *name = malloc(strlen(*user_list) + 1);
+                char *name = (char *)malloc(strlen(*user_list) + 1);
                 strcpy(name, *user_list);
                 cur = push_access(cur, name);
                 user_list++;
@@ -198,7 +204,7 @@ create_access(access_t *head, char *flavor, char *service, node_t* conf)
 node_t *
 push(node_t *head, char *service, char *option, char *target, char *param) {
     node_t *cur = NULL;
-    cur = malloc(sizeof(node_t));
+    cur = (node_t *)malloc(sizeof(node_t));
     if (cur) {
       cur->service = service;
       cur->option  = option;
@@ -220,6 +226,7 @@ push(node_t *head, char *service, char *option, char *target, char *param) {
 
     return head;
 }
+
 
 node_t *
 get_config(node_t *head, char *user, char *service)

@@ -30,29 +30,30 @@
 #include "config.h"
 #include "log.h"
 
-
 int       history(char *, char *, char *, char *, char *);
 void      print_list(node_t *);
 void      print_access(access_t *, char *);
 void      get_default(settings_t *);
 node_t *  get_config(node_t *, char *, char *);
-void      slog(int number, ...);
-void      debug(int number, ...);
+void      slog(int, ...);
+void      debug(int, ...);
 void      debug_addr(void *, char *);
 void      make_log_prefix(char *, char *);
 access_t *create_access(access_t *, char *, char *, node_t *);
 
 int DEBUG = 0;
 
-void
+char *
 rmn(char *str)
 {
   if (str == NULL)
-    return;
+    return str;
   int length = strlen(str);
   if (str[length-1] == '\n')
     str[length-1] = '\0';
+  return str;
 }
+
 
 int
 user_list_checker(access_t *LIST, char *user)
@@ -62,7 +63,7 @@ user_list_checker(access_t *LIST, char *user)
       rmn(user);
       rmn(LIST->user);
       debug(3, "LIST->user -> '", LIST->user, "'");
-      debug(3, "user -> '",             user, "'");
+      debug(3, "user       -> '",       user, "'");
 
       if (strncmp(LIST->user, user, strlen(user)) == 0) {
         debug(1, "SAME");
@@ -72,7 +73,7 @@ user_list_checker(access_t *LIST, char *user)
       LIST = LIST->next;
     }
   }
-  debug(1,"EXIT");
+  debug(1,"EXIT LIST");
   return 0;
 }
 
@@ -81,7 +82,7 @@ int
 allow(pam_handle_t *pamh, char *service, char *user, char* host)
 {
   settings_t *def = NULL;
-  def = malloc(sizeof(settings_t));
+  def = (settings_t *)malloc(sizeof(settings_t));
   if (def == NULL) {
     slog(1, "error, can't allocate memory");
     exit(1);
@@ -206,7 +207,7 @@ pam_sm_close_session(pam_handle_t *pamh, int flags, int argc, const char **argv)
     host = "localhost";
 
   settings_t *def = NULL;
-  def = malloc(sizeof(settings_t));
+  def = (settings_t *)malloc(sizeof(settings_t));
   if (def == NULL) {
     slog(1, "error, can't allocate memory");
     exit(1);
