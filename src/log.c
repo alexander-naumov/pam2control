@@ -30,29 +30,68 @@
 #include<errno.h>
 #include<time.h>
 
+#include "pam2control.h"
+
 const char *log_path;
 const char *log_proc;
 
 void
-ilog(int number, char *str)
+debug_int(int number, char *str)
 {
-  openlog (log_proc, LOG_CONS | LOG_PID | LOG_NDELAY, LOG_LOCAL1);
-  syslog (LOG_INFO, "%d %s", number, str);
+  if (DEBUG) {
+    openlog (log_proc, LOG_CONS | LOG_PID | LOG_NDELAY, LOG_LOCAL1);
+    syslog (LOG_INFO, "%d %s", number, str);
+  }
 }
 
 void
-blog(void *address, char *str)
+debug_addr(void *address, char *str)
 {
+  if (DEBUG) {
+    openlog (log_proc, LOG_CONS | LOG_PID | LOG_NDELAY, LOG_LOCAL1);
+    syslog (LOG_INFO, "%p %s", address, str);
+  }
+}
+
+
+void
+debug(int arg_count, ...)
+{
+  if (!DEBUG)
+    return;
+
+  int i, len = 0;
+  char *LOG = NULL;
+  char *str;
+
+  va_list ap;
+  va_start(ap, arg_count);
+
+  for (i=1; i <= arg_count; i++) {
+    str = va_arg(ap, char *);
+    len += strlen(str);
+
+    if (i==1) {
+      LOG = (char *)malloc(len + 1);
+      if (LOG)
+        strcpy (LOG, str);
+    }
+    else{
+      LOG = (char *)realloc(LOG, len + 1);
+      if (LOG)
+        strcat(LOG, str);
+    }
+  }
   openlog (log_proc, LOG_CONS | LOG_PID | LOG_NDELAY, LOG_LOCAL1);
-  syslog (LOG_INFO, "%p %s", address, str);
+  syslog (LOG_INFO, LOG);
+  free(LOG);
 }
 
 
 void
 slog(int arg_count, ...)
 {
-  int i;
-  int len = 0;
+  int i, len = 0;
   char *LOG = NULL;
   char *str;
 

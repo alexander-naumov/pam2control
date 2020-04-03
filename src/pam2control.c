@@ -31,15 +31,16 @@
 #include "log.h"
 
 
-int        history(char *, char *, char *, char *, char *);
-void       print_list(node_t *);
-void       print_access(access_t *, char *);
-void       get_default(settings_t *);
-node_t *   get_config(node_t *, char *, char *);
-void       slog(int number, ...);
-void       blog(void *, char *);
-void       make_log_prefix(char *, char *);
-access_t * create_access(access_t *, char *, char *, node_t *);
+int       history(char *, char *, char *, char *, char *);
+void      print_list(node_t *);
+void      print_access(access_t *, char *);
+void      get_default(settings_t *);
+node_t *  get_config(node_t *, char *, char *);
+void      slog(int number, ...);
+void      debug(int number, ...);
+void      debug_addr(void *, char *);
+void      make_log_prefix(char *, char *);
+access_t *create_access(access_t *, char *, char *, node_t *);
 
 int DEBUG = 0;
 
@@ -60,18 +61,18 @@ user_list_checker(access_t *LIST, char *user)
     while(LIST){
       rmn(user);
       rmn(LIST->user);
-      slog(3, "LIST->user -> '", LIST->user, "'");
-      slog(3, "user -> '", user, "'");
+      debug(3, "LIST->user -> '", LIST->user, "'");
+      debug(3, "user -> '",             user, "'");
 
       if (strncmp(LIST->user, user, strlen(user)) == 0) {
-        slog(1, "SAME");
+        debug(1, "SAME");
         return 1;
       }
-      slog(1, "NOT SAME, NEXT...");
+      debug(1, "NOT SAME, NEXT...");
       LIST = LIST->next;
     }
   }
-  slog(1,"EXIT");
+  debug(1,"EXIT");
   return 0;
 }
 
@@ -88,11 +89,9 @@ allow(pam_handle_t *pamh, char *service, char *user, char* host)
 
   get_default(def);
 
-  if (DEBUG) {
-    slog(3, "p2c: DEFAULT - '", def->DEFAULT, "'");
-    slog(3, "p2c: MAILSER - '", def->MAILSERVER, "'");
-    slog(3, "p2c: LOGFILE - '", def->LOGFILE, "'");
-  }
+  debug(3, "p2c: DEFAULT - '", def->DEFAULT, "'");
+  debug(3, "p2c: MAILSER - '", def->MAILSERVER, "'");
+  debug(3, "p2c: LOGFILE - '", def->LOGFILE, "'");
 
   node_t *conf = NULL;
   conf = get_config(conf, user, service);
@@ -108,7 +107,7 @@ allow(pam_handle_t *pamh, char *service, char *user, char* host)
   if (DEBUG) {
     print_access(OPEN, "OPEN");
     print_access(CLOSE,"CLOSE");
-    slog(1,"=============================");
+    debug(1,"=============================");
   }
 
 
@@ -170,11 +169,13 @@ pam_sm_authenticate(pam_handle_t *pamh, int flags, int argc, const char **argv)
   ret = allow(pamh, service, user, host);
 
   if (ret == PAM_SUCCESS){
-    history(service, "OPEN", host, user, "access granted");
+    slog(2, "access granted: user -> ", user);
+    history(service, "OPEN", host, user, "access granted (auth)");
     return PAM_SUCCESS;
   }
 
-  history(service, "CLOSE", host, user, "access denied");
+  slog(2, "access denied: user -> ", user);
+  history(service, "CLOSE", host, user, "access denied (auth)");
   return ret;
 }
 
@@ -211,6 +212,7 @@ pam_sm_close_session(pam_handle_t *pamh, int flags, int argc, const char **argv)
     exit(1);
   }
   get_default(def);
+  slog(2, "closing session: user -> ", user);
   history(service, "OPEN", host, user, "closing session");
   return PAM_SUCCESS;
 }

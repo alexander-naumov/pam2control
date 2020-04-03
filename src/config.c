@@ -30,11 +30,12 @@
 #include "config.h"
 #include "pam2control.h"
 
-void    slog(int, ...);
-void    blog(void *, char *);
-void    ilog(int, char *);
-char *  make_log_prefix(char *, char *);
-void    rmn(char *);
+void  slog(int, ...);
+void  debug(int, ...);
+void  debug_addr(void *, char *);
+void  debug_int(int, char *);
+char *make_log_prefix(char *, char *);
+void  rmn(char *);
 
 const char *log_path;
 
@@ -54,14 +55,14 @@ length(struct node* head)
 void
 print_access(access_t *LIST, char *flavor)
 {
-  slog(3, "==== ACCESS ", flavor, " ===========");
+  debug(3, "==== ACCESS ", flavor, " ===========");
   if (LIST == NULL) {
-    slog(1, "NULL...");
+    debug(1, "NULL...");
     return;
   }
 
   while(LIST) {
-    blog(LIST, LIST->user);
+    debug_addr(LIST, LIST->user);
     LIST = LIST->next;
   }
 }
