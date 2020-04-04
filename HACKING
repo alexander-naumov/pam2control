@@ -1,0 +1,36 @@
+Some notes on hacking the pam2control source.
+
+
+* For processing all main structs/data_types used linked lists. Be careful
+  with free(), since new objects can still need old memory areas.
+
+
+* For small debuging stuff functions debug(), debug_addr() and debug_int()
+  could be used. The differences are data types of arguments.
+  debug() can operate with multiply number of arguments. First argument of
+  debug() is (int) number of strings (char *), following after it.
+  Functions debug_addr() and debug_int() take only two arguments: pointer
+  or integer and string.
+  To switch p2c to the debug modus - add 'debug' to the end of p2c line in
+  /etc/pam.d/<PAM> file.
+
+
+* Function rmn() takes a pointer as an argument and returns the same pointer.
+  It's not really necessary, but helps to be more function.
+
+
+* Function prototypes should not have variable names associated with the
+  types; i.e.,
+      void	func(int);
+  not
+      void	func(int a);
+
+
+* Avoid typedefs ending in “_t”, except as specified in Standard C or by
+  POSIX.
+
+
+* The function type should be on a line by itself preceding the function.
+      static char *
+      func(char *str, char *foo, char *bar)
+      {
