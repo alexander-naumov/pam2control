@@ -23,6 +23,13 @@ install:
 	mkdir -p /etc/pam2control
 	install -m 600 p2c.conf.default /etc/pam2control/
 	mkdir -p /var/log/pam2control
+	mkdir -p /usr/share/man/man5/
+	install -m 644 p2c.conf.5 /usr/share/man/man5/p2c.conf.5
+	gzip /usr/share/man/man5/p2c.conf.5
 
 clean:
 	rm -f $(OBJ)
+
+uninstall:
+	rm -rf /usr/share/man/man5/p2c.conf.5.gz
+	rm -rf $(LIB_PATH)/security/pam2control.so
