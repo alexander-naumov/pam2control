@@ -1,10 +1,10 @@
-.TH "P2C\&.CONF" "5" "Apr 2020" "pam2conrol v0.1"
+.TH "P2C\&.CONF" "5" "Apr 2020" "pam2control v0.1"
 .SH NAME
-p2c.conf \- pam2control configuration file.
+p2c.conf \- \fBpam2control\fP configuration file.
 
 .SH CONFIGURATION
-To configure pam2control you will need to fill config file. This file can contain
-the list of rules and also values for some variables.
+To configure \fBpam2control\fP you will need to fill config file.
+This file can contain the list of rules and also values for some variables.
 .PP
 Each rule has to include exactly four fields separated by spaces:
 .RE 4
@@ -66,8 +66,8 @@ It can be helpfull to use comments in configuration file. Comments starts with t
 character, #, and extend to the end of the physical line (exactly like for the most configuration
 files in the UNIX/Linux world).
 .PP
-It's possible to switch pam2control to debug mode. By using this mode pam2control writes more
-information to \fBsyslog\fP(3) what can be useful by debugging or development.
+It's possible to switch \fBpam2control\fP to debug mode. By using this mode \fBpam2control\fP
+writes more information to \fBsyslog\fP(3) what can be useful by debugging or development.
 To switch pam2contol to debug mode, just add 'debug' to the end of p2c line in /etc/pam.d/<PAM>
 file. This is the standard way to debug pam modules.
 .PP
