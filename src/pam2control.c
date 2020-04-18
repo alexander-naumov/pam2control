@@ -166,7 +166,6 @@ pam_sm_authenticate(pam_handle_t *pamh, int flags, int argc, const char **argv)
   if (strstr(host,"::1"))
     host = "localhost";
 
-
   ret = allow(pamh, service, user, host);
 
   if (ret == PAM_SUCCESS){

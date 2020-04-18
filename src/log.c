@@ -122,11 +122,11 @@ slog(int arg_count, ...)
 int
 history(char *service, char *access, char *host, char *user, char *msg)
 {
-  FILE *fp;
+  FILE   *fp;
   time_t t;
   struct tm *tm;
-  char *date;
-  char *logfile;
+  char   date[80];
+  char   *logfile;
 
   t = time(NULL);
   tm = localtime(&t);
@@ -154,7 +154,7 @@ history(char *service, char *access, char *host, char *user, char *msg)
   }
 
   strftime(date, 64, "%c", tm);
-  if (fprintf(fp, "%-28s %-8s %-5s %10s@%-15s %-20s\n",  date, service, access, user, host, msg) < 0) {
+  if (fprintf(fp, "%-28s %-8s %-5s %10s@%-15s %-20s\n", date, service, access, user, host, msg) < 0) {
     slog(1, "something goes wrong by put info to the logfile");
     return 1;
   }
