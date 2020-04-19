@@ -153,6 +153,7 @@ history(char *service, char *access, char *host, char *user, char *msg)
     return 1;
   }
 
+  chmod(logfile, 0600);
   strftime(date, 64, "%c", tm);
   if (fprintf(fp, "%-28s %-8s %-5s %10s@%-15s %-20s\n", date, service, access, user, host, msg) < 0) {
     slog(1, "something goes wrong by put info to the logfile");

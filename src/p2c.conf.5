@@ -35,7 +35,7 @@ this field defines values for TARGET.
 
 .RE
 .RE
-There are a list of variables that can be defined in this file:
+There are a list of variables that can be defined:
 .PP
 .RS 4
 DEFAULT
@@ -59,6 +59,26 @@ It makes it easier to debug the access problems if any and makes configuration m
 intuitive.
 .PP
 .RE
+
+LOGFILE
+.RS 4
+It's possible to set name of the logfile you like. Default value is
+\fI/var/log/pam2control/p2c-<YEAR>-<MONTH>.log\fR. There is no need for logrotate, because
+last symbols which includs current year and month "-<YEAR>-<MONTH>.log" will append automatically
+to the end of filename (in other words, default filename is /var/log/pam2control/p2c).
+.br
+File permissions of logfiles are always 600 (read-write only for root).
+Directory /var/log/pam2control/ is created during pam2control installation. If you would like
+to use other directory, you will need to create it manually.
+.br
+For example, to become logfile /var/log/pam2control/mylogfile-2020-04.log use this line:
+.PP
+.RS 7
+LOGFILE:/var/log/pam2control/mylogfile
+.RE
+.PP
+In May (next month) pam2control will automatically create and start to use
+/var/log/pam2control/mylogfile-2020-05.log. In June: ...2020-06.log, etc.
 .RE
 
 .PP
