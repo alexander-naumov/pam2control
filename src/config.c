@@ -169,29 +169,35 @@ push_access(access_t *head, char *user)
 access_t *
 create_access(access_t *head, char *flavor, char *service, node_t* conf)
 {
+  char *csv     = NULL;
   access_t *cur = NULL;
+
   while(conf) {
     if ((!strncmp(conf->service, service, strlen(service))) &&
         (!strncmp(conf->option, flavor, strlen(flavor)))    &&
         (conf->param)){
 
-          if (!strncmp(conf->target, "user", 4))
-            cur = push_access(cur, conf->param);
+          csv = strtok (conf->param,",");
+          while (csv) {
+            debug(2, "csv = ", csv);
+            if (!strncmp(conf->target, "user", 4))
+              cur = push_access(cur, csv);
 
-          if (!strncmp(conf->target, "group", 5)){
-            char **user_list = get_user_list_group(rmn(conf->param));
+            if (!strncmp(conf->target, "group", 5)){
+              char **user_list = get_user_list_group(rmn(csv));
 
-            if (user_list)
-              while (*user_list != NULL) {
-                char *name = (char *)malloc(strlen(*user_list) + 1);
-                strcpy(name, *user_list);
-                cur = push_access(cur, name);
-                user_list++;
-              }
-            else
-              slog(3, "group '", conf->param, "' is empty");
+              if (user_list)
+                while (*user_list != NULL) {
+                  char *name = (char *)malloc(strlen(*user_list) + 1);
+                  strcpy(name, *user_list);
+                  cur = push_access(cur, name);
+                  user_list++;
+                }
+            }
+            if (!head)
+              head = cur;
+            csv = strtok (NULL,",");
           }
-
     }
     if (!head)
       head = cur;
