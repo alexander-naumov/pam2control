@@ -286,7 +286,7 @@ get_default(settings_t *def)
   char *line = NULL;
   char *pch;
 
-  def->MAILSERVER = NULL;
+  def->MAILSERVER = "localhost";
   def->DEFAULT = "CLOSE";
   def->LOGFILE = "/var/log/pam2control/p2c";
 
