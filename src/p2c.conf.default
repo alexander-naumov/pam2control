@@ -3,7 +3,3 @@
 # find more info: man p2c.conf
 
 DEFAULT:OPEN
-MAILSERVER:192.168.3.1
-
-sshd open user alex
-sshd close user tom
