@@ -62,18 +62,18 @@ user_list_checker(access_t *LIST, char *user)
     while(LIST){
       rmn(user);
       rmn(LIST->user);
-      debug(3, "LIST->user -> '", LIST->user, "'");
-      debug(3, "user       -> '",       user, "'");
+      debug(3, user, " => ", LIST->user);
 
-      if (strncmp(LIST->user, user, strlen(user)) == 0) {
-        debug(1, "SAME");
+      if ((strncmp(LIST->user, user, strlen(user)) == 0) &&
+          (strlen(LIST->user) == strlen(user))) {
+        debug(1, "same!");
         return 1;
       }
-      debug(1, "NOT SAME, NEXT...");
+      debug(1, "not same, next...");
       LIST = LIST->next;
     }
   }
-  debug(1,"EXIT LIST");
+  debug(1,"--------------");
   return 0;
 }
 
