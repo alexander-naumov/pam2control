@@ -163,7 +163,8 @@ pam_sm_authenticate(pam_handle_t *pamh, int flags, int argc, const char **argv)
     if ((argv[i]) && (strncmp(argv[i],"debug",5) == 0))
       DEBUG = 1;
   }
-  if (strstr(host,"::1"))
+
+  if (strstr(host,"::1") || strlen(host) == 0)
     host = "localhost";
 
   ret = allow(pamh, service, user, host);
@@ -202,7 +203,7 @@ pam_sm_close_session(pam_handle_t *pamh, int flags, int argc, const char **argv)
   slog(1, "==== closing session ==========================");
 
 
-  if (strstr(host,"::1"))
+  if (strstr(host,"::1") || strlen(host) == 0)
     host = "localhost";
 
   settings_t *def = NULL;
