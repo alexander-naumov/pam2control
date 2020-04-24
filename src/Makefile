@@ -4,6 +4,8 @@ OBJ=    pam2control.o config.o log.o
 
 ifeq ($(shell uname -m), x86_64)
 	LIB_PATH = /lib64
+else ifeq ($(shell uname -m), aarch64)
+	LIB_PATH = /lib/aarch64-linux-gnu
 else
 	LIB_PATH = /lib
 endif
