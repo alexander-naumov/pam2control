@@ -1,34 +1,38 @@
 .TH "P2C\&.CONF" "5" "Apr 2020" "pam2control v0.1"
 .SH NAME
-p2c.conf \- \fBpam2control\fP configuration file.
+/etc/pam2control/p2c.conf \- pam2control configuration file.
 
 .SH CONFIGURATION
-To configure \fBpam2control\fP you will need to fill config file.
-This file can contain the list of rules and also values for some variables.
+To configure pam2control you will need to fill this config file.
+This file should contain the list of rules and also can contain values for some variables.
 .PP
-Each rule has to include exactly four fields separated by spaces:
-.RE 4
+Each rule has to include exactly four fields separated by spaces: <SERVICE> <OPTION> <TARGET> <PARAMETERS>
 .PP
 .RS 4
-<SERVICE> <OPTION> <TARGET> <PARAMETERS>
-.PP
-SERVICE
+\fBSERVICE\fP
 .RS 4
 defines \fIPAM\fR service that should be managed. List of PAM services could be found
 in \fB/etc/pam.d/*\fP directory.
-.PP
+.br
+All services that should be managed by pam2control have to include these two lines:
+.RS 7
+auth        required    pam2control.so
+.br
+session     required    pam2control.so
+
 .RE
-OPTION
+.RE
+\fBOPTION\fP
 .RS 4
 behavior for its SERVICE. It could be one of two types: \fIOPEN\fR or \fICLOSE\fR.
 .PP
 .RE
-TARGET
+\fBTARGET\fP
 .RS 4
-defines target for SERVICE. Supported targets are \fIUSER\fR and \fIGROUP\fR.
+defines target for SERVICE. At the moment supported targets are \fIUSER\fR and \fIGROUP\fR.
 .PP
 .RE
-PARAMETERS
+\fBPARAMETERS\fP
 .RS 4
 this field defines values for TARGET. It's possible to set list of parameters in one
 line; use "," as a separator for that. No space is needed.
@@ -39,7 +43,7 @@ line; use "," as a separator for that. No space is needed.
 There are a list of variables that can be defined:
 .PP
 .RS 4
-DEFAULT
+\fBDEFAULT\fP
 .RS 4
 It's posible to define default behavior for the not configured cases by using \fIDEFAULT\fR rule.
 The syntax for this rule is defferent like for other rules. It's sepatated by ":" symbol,
@@ -61,25 +65,23 @@ intuitive.
 .PP
 .RE
 
-LOGFILE
+\fBLOGFILE\fP
 .RS 4
-It's possible to set name of the logfile you like. Default value is
+It's possible to set name of the logfile. Default value is
 \fI/var/log/pam2control/p2c-<YEAR>-<MONTH>.log\fR. There is no need for logrotate, because
 last symbols which includs current year and month "-<YEAR>-<MONTH>.log" will append automatically
 to the end of filename (in other words, default filename is /var/log/pam2control/p2c).
-.br
 File permissions of logfiles are always 600 (read-write only for root).
-Directory /var/log/pam2control/ is created during pam2control installation. If you would like
-to use other directory, you will need to create it manually.
-.br
+Directory /var/log/pam2control/ is created during pam2control installation.
+If you like to use other directory, you will need to create it manually.
+.PP
 For example, to become logfile /var/log/pam2control/mylogfile-2020-04.log use this line:
 .PP
 .RS 7
 LOGFILE:/var/log/pam2control/mylogfile
 .RE
 .PP
-In May (next month) pam2control will automatically create and start to use
-/var/log/pam2control/mylogfile-2020-05.log. In June: ...2020-06.log, etc.
+pam2control will take care about adding current year and month to logfile name.
 .RE
 
 .PP
@@ -87,11 +89,27 @@ It can be helpfull to use comments in configuration file. Comments starts with t
 character, #, and extend to the end of the physical line (exactly like for the most configuration
 files in the UNIX/Linux world).
 .PP
-It's possible to switch \fBpam2control\fP to debug mode. By using this mode \fBpam2control\fP
+It's possible to switch pam2control to debug mode. By using this mode pam2control
 writes more information to \fBsyslog\fP(3) what can be useful by debugging or development.
 To switch pam2contol to debug mode, just add 'debug' to the end of p2c line in /etc/pam.d/<PAM>
 file. This is the standard way to debug pam modules.
 .PP
+
+.SH EXAMPLES
+This example demonstrates the setting where SSH access is open for users 'tom' and 'alex' only:
+.PP
+.RS 4
+DEFAULT:CLOSE
+.br
+SSHD OPEN USERS tom,alex
+.RE
+.PP
+These two lines should be added to the \fI/etc/pam.d/sshd\fR file:
+.PP
+.RS 4
+auth        required    pam2control.so
+.br
+session     required    pam2control.so
 
 .SH AUTHOR
 Written by Alexander Naumov <alexander_naumov@opensuse.org>
