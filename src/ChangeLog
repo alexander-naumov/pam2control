@@ -1,0 +1,6 @@
+Version 0.1 (24.04.2020):
+  * Alpha release.
+  * Supports only OPEN or CLOSE access modes.
+  * Logfile can be define in config file.
+  * Supports POSIX groups.
+  * Supports debug (verbose) mode.
