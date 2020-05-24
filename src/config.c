@@ -256,6 +256,7 @@ get_config(node_t *head, char *user, char *service)
     if ((line[0] == '#')                     ||
         (strlen(line) < 9)                   ||
         (strncmp("DEFAULT", line, 7) == 0)   ||
+        (strncmp("LOGFILE", line, 7) == 0)   ||
         (strncmp("MAILSERVER", line, 10) == 0))
       continue;
 
