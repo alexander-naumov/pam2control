@@ -166,6 +166,77 @@ push_access(access_t *head, char *user)
 }
 
 
+notify_t *
+create_notify(notify_t *head, char *service, node_t* conf)
+{
+  char *mail_list = NULL;
+  char *mail      = NULL;
+  char *csv       = NULL;
+  char *param     = NULL;
+  notify_t *cur   = NULL;
+
+  while(conf) {
+    if ((!strncmp(conf->service, service, strlen(service))) &&
+        (!strncmp(conf->option, "notify:", 7))              &&
+        (conf->param)){
+
+          strtok(conf->option,":");
+          mail_list = strtok (NULL,":");
+
+          while(mail = strtok_r(mail_list, ",", &mail_list)) {
+            debug(2, "mail = ", mail);
+
+            cur = (notify_t *)malloc(sizeof(notify_t));
+            if (cur) {
+              cur->mail = mail;
+              cur->list = NULL;
+              cur->next = NULL;
+              debug_addr(cur, " <- cur");
+              debug(2, "cur->mail =        ", rmn(cur->mail));
+            }
+            else
+              slog(1, "can't allocate memory...");
+
+            csv = NULL;
+            param = conf->param;
+
+            while (csv = strtok_r(param, ",", &param)) {
+              debug(2, "csv = ", csv);
+              if (!strncmp(conf->target, "user", 4))
+                cur->list = push_access(cur->list, csv);
+
+              if (!strncmp(conf->target, "group", 5)){
+                char **user_list = get_user_list_group(rmn(csv));
+
+                if (user_list)
+                  while (*user_list != NULL) {
+                    char *name = (char *)malloc(strlen(*user_list) + 1);
+                    strcpy(name, *user_list);
+                    cur->list = push_access(cur->list, name);
+                    user_list++;
+                  }
+              }
+            } /* csv */
+
+            if (head) {
+              while (head->next != NULL) {
+                head = head->next;
+                debug_addr(head, " <- head");
+              }
+              head->next = cur;
+            }
+            else
+              head = cur;
+
+            debug_addr(head, " <======= head");
+          } /* mail */
+    }
+    conf = conf->next;
+  }
+  return head;
+}
+
+
 access_t *
 create_access(access_t *head, char *flavor, char *service, node_t* conf)
 {

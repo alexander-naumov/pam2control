@@ -1,6 +1,6 @@
 CC=     gcc
 LIBS=   -lpam
-OBJ=    pam2control.o config.o log.o
+OBJ=    pam2control.o config.o log.o smtp.o
 
 ifeq ($(shell uname -m), x86_64)
 	LIB_PATH = /lib64
@@ -16,7 +16,7 @@ endif
 
 
 pam2control: $(OBJ)
-	$(CC) -Wall -fPIC -c pam2control.c config.c log.c
+	$(CC) -Wall -fPIC -c pam2control.c config.c log.c smtp.c
 	$(CC) -shared -o pam2control.so $(OBJ) $(LIBS)
 
 

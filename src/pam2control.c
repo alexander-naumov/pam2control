@@ -29,7 +29,9 @@
 
 #include "config.h"
 #include "log.h"
+#include "smtp.h"
 
+int       email_login_notify(char *, char *, char *, char *, char *);
 int       history(char *, char *, char *, char *, char *);
 void      print_list(node_t *);
 void      print_access(access_t *, char *);
@@ -40,6 +42,7 @@ void      debug(int, ...);
 void      debug_addr(void *, char *);
 void      make_log_prefix(char *, char *);
 access_t *create_access(access_t *, char *, char *, node_t *);
+notify_t *create_notify(notify_t *, char *, node_t *);
 
 int DEBUG = 0;
 
@@ -79,6 +82,26 @@ user_list_checker(access_t *LIST, char *user)
 
 
 int
+mail_notify(notify_t *ntf, char *server, char *user, char *host, char *service)
+{
+  while(ntf && ntf->mail && ntf->list){
+    while(ntf->list) {
+      if ((strncmp(ntf->list->user, user, strlen(user)) == 0) &&
+          (strlen (ntf->list->user) == strlen(user))) {
+
+        debug(2,"ntf->list->user = ", ntf->list->user);
+        debug(2,"user = ", user);
+        email_login_notify(server, ntf->mail, host, user, service);
+      }
+      ntf->list = ntf->list->next;
+    }
+    ntf = ntf->next;
+  }
+  return 0;
+}
+
+
+int
 allow(pam_handle_t *pamh, char *service, char *user, char* host)
 {
   settings_t *def = NULL;
@@ -99,11 +122,13 @@ allow(pam_handle_t *pamh, char *service, char *user, char* host)
   if (DEBUG && conf)
     print_list(conf);
 
-  access_t *OPEN  = NULL;
-  access_t *CLOSE = NULL;
-  OPEN  = create_access(OPEN,  "open",  service, conf);
-  CLOSE = create_access(CLOSE, "close", service, conf);
+  access_t *OPEN   = NULL;
+  access_t *CLOSE  = NULL;
+  notify_t *NOTIFY = NULL;
 
+  OPEN   = create_access(OPEN,  "open",  service, conf);
+  CLOSE  = create_access(CLOSE, "close", service, conf);
+  NOTIFY = create_notify(NOTIFY, service, conf);
 
   if (DEBUG) {
     print_access(OPEN, "OPEN");
@@ -115,13 +140,17 @@ allow(pam_handle_t *pamh, char *service, char *user, char* host)
   if (user_list_checker(CLOSE, user))
     return PAM_AUTH_ERR;
 
-  if (user_list_checker(OPEN, user))
+  if (user_list_checker(OPEN, user)) {
+    mail_notify(NOTIFY, def->MAILSERVER, user, host, service);
     return PAM_SUCCESS;
+  }
 
   /* DEFAULT RULE */
   if ((strncmp(def->DEFAULT, "OPEN",  4) == 0) ||
-      (strncmp(def->DEFAULT, "open",  4) == 0))
+      (strncmp(def->DEFAULT, "open",  4) == 0)) {
+    mail_notify(NOTIFY, def->MAILSERVER, user, host, service);
     return PAM_SUCCESS;
+  }
 
   return PAM_AUTH_ERR;
 }

@@ -113,7 +113,7 @@ socket_io(short IO, int sock, char *data, int len_IO)
           len = recv(sock, data, len_IO, 0);
         break;
       }
-	}
+  }
   return len;
 }
 

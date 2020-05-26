@@ -19,35 +19,9 @@
  ****************************************************************
  */
 
+#ifndef SMTP_H
+#define SMTP_H
 
-#ifndef CONFIG_H
-#define CONFIG_H
-
-#define CONFFILE "/etc/pam2control/p2c.conf"
-
-typedef struct notify {
-    char *mail;
-    struct access *list;
-    struct notify *next;
-} notify_t;
-
-typedef struct access {
-    char *user;
-    struct access *next;
-} access_t;
-
-typedef struct settings {
-    char *DEFAULT;
-    char *LOGFILE;
-    char *MAILSERVER;
-} settings_t;
-
-typedef struct node {
-    char  *service;
-    char  *option;
-    char  *target;
-    char  *param;
-    struct node *next;
-} node_t;
 
 #endif
+
