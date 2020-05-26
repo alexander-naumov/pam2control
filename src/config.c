@@ -34,7 +34,6 @@ void  slog(int, ...);
 void  debug(int, ...);
 void  debug_addr(void *, char *);
 void  debug_int(int, char *);
-char *make_log_prefix(char *, char *);
 char *rmn(char *);
 
 const char *log_path;

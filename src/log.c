@@ -168,30 +168,3 @@ history(char *service, char *access, char *host, char *user, char *msg)
   free(logfile);
   return 0;
 }
-
-
-void
-make_log_prefix(char *service, char *user)
-{
-  char *begin = "pam2control(";
-  char *spliter = ":";
-  char *end = ")";
-
-  char *log_prefix;
-  log_prefix = malloc(
-        strlen(begin) +
-        strlen(service) +
-        strlen(spliter) +
-        strlen(user) +
-        strlen(end) + 1);
-
-  if (log_prefix) {
-        strcpy (log_prefix, begin);
-        strcat (log_prefix, service);
-        strcat (log_prefix, spliter);
-        strcat (log_prefix, user);
-        strcat (log_prefix, end);
-  }
-  log_proc = log_prefix;
-}
-

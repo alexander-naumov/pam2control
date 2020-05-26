@@ -40,7 +40,6 @@ node_t *  get_config(node_t *, char *, char *);
 void      slog(int, ...);
 void      debug(int, ...);
 void      debug_addr(void *, char *);
-void      make_log_prefix(char *, char *);
 access_t *create_access(access_t *, char *, char *, node_t *);
 notify_t *create_notify(notify_t *, char *, node_t *);
 
@@ -165,7 +164,7 @@ pam_sm_open_session(pam_handle_t *pamh, int flags, int argc, const char **argv)
   (void) pam_get_user(pamh, (const char **) &user, NULL);
   (void) pam_get_item(pamh, PAM_SERVICE, (const void **) &service);
 
-  make_log_prefix(service, user);
+  asprintf(&log_proc, "pam2control(%s:%s)", service, user);
   slog(1, "==== open new session =========================");
   return PAM_SUCCESS;
 }
@@ -184,7 +183,7 @@ pam_sm_authenticate(pam_handle_t *pamh, int flags, int argc, const char **argv)
   (void) pam_get_item(pamh, PAM_SERVICE, (const void **) &service);
   (void) pam_get_item(pamh, PAM_RHOST, (const void **) &host);
 
-  make_log_prefix(service, user);
+  asprintf(&log_proc, "pam2control(%s:%s)", service, user);
   slog(1, "==== authentication phase =====================");
 
   for (int i = 0; i<argc; i++)
@@ -228,7 +227,7 @@ pam_sm_close_session(pam_handle_t *pamh, int flags, int argc, const char **argv)
   (void) pam_get_item(pamh, PAM_SERVICE, (const void **) &service);
   (void) pam_get_item(pamh, PAM_RHOST, (const void **) &host);
 
-  make_log_prefix(service, user);
+  asprintf(&log_proc, "pam2control(%s:%s)", service, user);
   slog(1, "==== closing session ==========================");
 
 
