@@ -1,3 +1,6 @@
+Version 0.2 ():
+  * Notification about every new login via SMTP.
+
 Version 0.1 (24.04.2020):
   * Alpha release.
   * Supports only OPEN or CLOSE access modes.

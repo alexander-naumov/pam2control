@@ -24,7 +24,11 @@ session     required    pam2control.so
 .RE
 \fBOPTION\fP
 .RS 4
-behavior for its SERVICE. It could be one of two types: \fIOPEN\fR or \fICLOSE\fR.
+behavior for its SERVICE. Supported values are \fIOPEN\fR, \fICLOSE\fR or \fINOTIFY:\fR.
+.br
+\fINOTIFY:\fR should set the email address of a recipian. It's possible to set a comma
+separated list of emails.
+
 .PP
 .RE
 \fBTARGET\fP
@@ -65,6 +69,12 @@ intuitive.
 .PP
 .RE
 
+\fBMAILSERVER\fP
+.RS 4
+This variable sets name or address of the mail server that will be responsible for delivering
+notification mails. By default localhost is used.
+.RE
+
 \fBLOGFILE\fP
 .RS 4
 It's possible to set name of the logfile. Default value is
@@ -96,12 +106,18 @@ file. This is the standard way to debug pam modules.
 .PP
 
 .SH EXAMPLES
-This example demonstrates the setting where SSH access is open for users 'tom' and 'alex' only:
+This example demonstrates setting where SSH access is open for users 'tom' and 'alex' only.
+By every new SSH login of user 'tom', notification mail will be send to 'tom@example.net'
+and 'admin@company.com' addresses via MTA with IP 10.10.4.7.
 .PP
 .RS 4
 DEFAULT:CLOSE
 .br
+MAILSERVER:10.10.4.7
+.br
 SSHD OPEN USERS tom,alex
+.br
+SSHD NOTIFY:tom@example.net,admin@company.com USER tom
 .RE
 .PP
 These two lines should be added to the \fI/etc/pam.d/sshd\fR file:
