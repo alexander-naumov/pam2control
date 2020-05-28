@@ -90,14 +90,15 @@ socket_io(short IO, int sock, char *data, int len_IO)
   FD_ZERO(&fd);
   FD_SET(sock, &fd);
 
-  tv.tv_sec = 5;
+  tv.tv_sec  = 5;
+  tv.tv_usec = 0;
 
   while(1)
   {
     if (IO == SOCK_WRITE)
-      ret = select(sock+1, NULL, &fd, NULL, &tv);
+      ret = select(sock+1, (fd_set *)NULL, &fd, (fd_set *)NULL, &tv);
     else
-      ret = select(sock+1, &fd, NULL, NULL, &tv);
+      ret = select(sock+1, &fd, (fd_set *)NULL, (fd_set *)NULL, &tv);
 
     if (ret < 0)
       slog(2, "select: ", strerror(errno));
