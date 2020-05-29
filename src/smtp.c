@@ -54,7 +54,7 @@ connect_smtp(char* server, short port)
 
   if((host = gethostbyname(server)) == NULL) {
     debug(2, "gethostbyname: ", strerror(errno));
-    exit(-1);
+    return -1;
   }
 
   conn.sin_family = AF_INET;
@@ -64,13 +64,13 @@ connect_smtp(char* server, short port)
   sock = socket(AF_INET, SOCK_STREAM, 0);
   if (sock < 0) {
     debug(2, "socket: ", strerror(errno));
-    exit(-1);
+    return -1;
   }
 
   if (connect(sock, (struct sockaddr *)&conn, sizeof(conn)) < 0) {
     close(sock);
     debug(2, "connect: ", strerror(errno));
-    exit(-1);
+    return -1;
   }
   return sock;
 }
@@ -145,6 +145,8 @@ check_status(char *recv_str)
       return -1;
     }
   }
+
+  debug_int(atoi(status), " successfully returned from mail server");
   return 0;
 }
 
@@ -152,18 +154,20 @@ check_status(char *recv_str)
 int
 send_email(int sock, char *from, char *to, char *mail, int mail_len)
 {
+  int ret, err = 0;
   char data[SMTP_MTU] = {0};
 
   /* === MAIL FROM ======================================== */
-  //memset(&data, 0, SMTP_MTU);
+  memset(&data, 0, SMTP_MTU);
   sprintf(data, "MAIL FROM:<%s>\r\n", from);
   socket_io(SOCK_WRITE, sock, data, strlen(data));
 
   memset(&data, 0, SMTP_MTU);
   socket_io(SOCK_READ, sock, data, SMTP_MTU);
 
-  debug(2, "MAIL FROM recv: ", data);
-  check_status(data);
+  debug(2, "MAIL FROM answer: ", data);
+  if ((ret = check_status(data)) == -1)
+    err = ret;
 
 
   /* === RCPT TO ========================================== */
@@ -174,9 +178,9 @@ send_email(int sock, char *from, char *to, char *mail, int mail_len)
   memset(&data, 0, SMTP_MTU);
   socket_io(SOCK_READ, sock, data, SMTP_MTU);
 
-  debug(2, "RCPT TO recv: ", data);
-  check_status(data);
-
+  debug(2, "RCPT TO answer: ", data);
+  if ((ret = check_status(data)) == -1)
+    err = ret;
 
   /* === DATA ============================================= */
   memset(&data, 0, SMTP_MTU);
@@ -185,9 +189,9 @@ send_email(int sock, char *from, char *to, char *mail, int mail_len)
   memset(&data, 0, SMTP_MTU);
   socket_io(SOCK_READ, sock, data, SMTP_MTU);
 
-  debug(2, "DATA recv: ", data);
-  check_status(data);
-
+  debug(2, "DATA answer: ", data);
+  if ((ret = check_status(data)) == -1)
+    err = ret;
 
   /* === MAIL TEXT ======================================== */
   socket_io(SOCK_WRITE, sock, mail, mail_len);
@@ -195,9 +199,9 @@ send_email(int sock, char *from, char *to, char *mail, int mail_len)
   memset(&data, 0, SMTP_MTU);
   socket_io(SOCK_READ, sock, data, SMTP_MTU);
 
-  debug(2, "MAIL recv: ", data);
-  check_status(data);
-
+  debug(2, "MAIL answer: ", data);
+  if ((ret = check_status(data)) == -1)
+    err = ret;
 
   /* === QUIT ============================================= */
   memset(&data, 0, SMTP_MTU);
@@ -206,18 +210,17 @@ send_email(int sock, char *from, char *to, char *mail, int mail_len)
   memset(&data, 0, SMTP_MTU);
   socket_io(SOCK_READ, sock, data, SMTP_MTU);
 
-  debug(2, "QUIT recv: ", data);
-  check_status(data);
+  debug(2, "QUIT answer: ", data);
+  if ((ret = check_status(data)) == -1)
+    err = ret;
 
-  return 0;
+  return err;
 }
 
 int
 email_login_notify(char *server, char *to, char *host, char *user, char *service)
 {
-  int fd = 0;
-  int ret;
-
+  int  sock  = 0;
   char *mail = NULL;
   char *subj = NULL;
   char *body = NULL;
@@ -235,11 +238,15 @@ email_login_notify(char *server, char *to, char *host, char *user, char *service
   asprintf(&mail, "Subject: %s\r\n%s\r\n.\r\n", subj, body);
 
   debug(2, "server = ", server);
-  fd = connect_smtp(server, SMTP_PORT);
-  debug(1, "OK connect");
+  if ((sock = connect_smtp(server, SMTP_PORT)) == -1)
+    slog(1, "connect to mail server FAILED");
+  else
+    debug(1, "successfully connected to mail server");
 
-  ret = send_email(fd, from, to, mail, strlen(mail));
-  debug(1, "OK send");
+  if (send_email(sock, from, to, mail, strlen(mail)) == -1)
+    slog(1, "something goes wrong by sending mail");
+  else
+    debug(1, "mail successfully sent");
 
   free(mail);
   free(subj);
