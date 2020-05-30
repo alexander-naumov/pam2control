@@ -182,7 +182,7 @@ create_notify(notify_t *head, char *service, node_t* conf)
           strtok(conf->option,":");
           mail_list = strtok (NULL,":");
 
-          while(mail = strtok_r(mail_list, ",", &mail_list)) {
+          while((mail = strtok_r(mail_list, ",", &mail_list))) {
             debug(2, "mail = ", mail);
 
             cur = (notify_t *)malloc(sizeof(notify_t));
@@ -199,7 +199,7 @@ create_notify(notify_t *head, char *service, node_t* conf)
             csv = NULL;
             param = conf->param;
 
-            while (csv = strtok_r(param, ",", &param)) {
+            while ((csv = strtok_r(param, ",", &param))) {
               debug(2, "csv = ", csv);
               if (!strncmp(conf->target, "user", 4))
                 cur->list = push_access(cur->list, csv);
