@@ -38,8 +38,10 @@ defines target for SERVICE. At the moment supported targets are \fIUSER\fR and \
 .RE
 \fBPARAMETERS\fP
 .RS 4
-this field defines values for TARGET. It's possible to set list of parameters in one
-line; use "," as a separator for that. No space is needed.
+this field defines value for TARGET, i.e. username or group.
+It's possible to set a comma separated list of names.
+.br
+There is one special parameter called _ALL that matches for all usernames (but not for groups!).
 .PP
 
 .RE
@@ -106,7 +108,8 @@ file. This is the standard way to debug pam modules.
 .PP
 
 .SH EXAMPLES
-This example demonstrates setting where SSH access is open for users 'tom' and 'alex' only.
+This example demonstrates setting where SSH access is open for users 'tom' and 'alex' only
+and access via getty(1) is open for everybody.
 By every new SSH login of user 'tom', notification mail will be send to 'tom@example.net'
 and 'admin@company.com' addresses via MTA with IP 10.10.4.7.
 .PP
@@ -115,12 +118,14 @@ DEFAULT:CLOSE
 .br
 MAILSERVER:10.10.4.7
 .br
-SSHD OPEN USERS tom,alex
+sshd OPEN USER tom,alex
 .br
-SSHD NOTIFY:tom@example.net,admin@company.com USER tom
+sshd NOTIFY:tom@example.net,admin@company.com USER tom
+.br
+login OPEN USER _ALL
 .RE
 .PP
-These two lines should be added to the \fI/etc/pam.d/sshd\fR file:
+These two lines should be added to the \fI/etc/pam.d/sshd\fR and \fI/etc/pam.d/login\fR files:
 .PP
 .RS 4
 auth        required    pam2control.so

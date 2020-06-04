@@ -1,5 +1,6 @@
 Version 0.2 ():
   * Notification about every new login via SMTP.
+  * Paramter _ALL that matches for all usernames.
 
 Version 0.1 (24.04.2020):
   * Alpha release.

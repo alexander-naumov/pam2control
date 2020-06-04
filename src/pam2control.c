@@ -40,7 +40,7 @@ node_t *  get_config(node_t *, char *, char *);
 void      slog(int, ...);
 void      debug(int, ...);
 void      debug_addr(void *, char *);
-access_t *create_access(access_t *, char *, char *, node_t *);
+access_t *create_access(access_t *, char *, char *, char *, node_t *);
 notify_t *create_notify(notify_t *, char *, node_t *);
 
 int DEBUG = 0;
@@ -125,8 +125,8 @@ allow(pam_handle_t *pamh, char *service, char *user, char* host)
   access_t *CLOSE  = NULL;
   notify_t *NOTIFY = NULL;
 
-  OPEN   = create_access(OPEN,  "open",  service, conf);
-  CLOSE  = create_access(CLOSE, "close", service, conf);
+  OPEN   = create_access(OPEN,  "open",  service, user, conf);
+  CLOSE  = create_access(CLOSE, "close", service, user, conf);
   NOTIFY = create_notify(NOTIFY, service, conf);
 
   if (DEBUG) {

@@ -237,7 +237,7 @@ create_notify(notify_t *head, char *service, node_t* conf)
 
 
 access_t *
-create_access(access_t *head, char *flavor, char *service, node_t* conf)
+create_access(access_t *head, char *flavor, char *service, char *user, node_t* conf)
 {
   char *csv     = NULL;
   access_t *cur = NULL;
@@ -250,8 +250,12 @@ create_access(access_t *head, char *flavor, char *service, node_t* conf)
           csv = strtok (conf->param,",");
           while (csv) {
             debug(2, "csv = ", csv);
-            if (!strncmp(conf->target, "user", 4))
-              cur = push_access(cur, csv);
+            if (!strncmp(conf->target, "user", 4)) {
+              if (!strncmp(csv, "_ALL", 4))
+                cur = push_access(cur, user);
+              else
+                cur = push_access(cur, csv);
+            }
 
             if (!strncmp(conf->target, "group", 5)){
               char **user_list = get_user_list_group(rmn(csv));
