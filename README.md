@@ -1,16 +1,24 @@
 # pam2control
 [![Build Status](https://travis-ci.org/alexander-naumov/pam2control.svg?branch=master)](https://travis-ci.org/alexander-naumov/pam2control)
 
-pam2control is the easily configurable system to control access to host via PAM interfaces.
-It makes it possible to manages access for some user or group of users by adding just
-one line to the config file.
+pam2control, commonly known as p2c, is the easily configurable system to
+control access to host by using PAM interfaces.
+It makes it possible to manages access for some users (or group of users)
+just by adding one single line to the config file.
+It can notify you by sending an email if somebody login on server.
 It uses syslog and also its own logfile for every login-/logout-events.
 
-It's implemented in C and right now in an early stage of development.
+It's implemented in C and supports FreeBSD and GNU/Linux systems.
 
+## Installing pam2control
+```
+> cd src
+> make
+# make install
+```
+The p2c.conf man page has details on how to configure pam2control.
 
-Credits
--------
+## Credits
 
 Copyright (c) 2018-2020 Alexander Naumov (alexander_naumov@opensuse.org).
 
