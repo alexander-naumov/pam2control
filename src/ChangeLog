@@ -1,6 +1,7 @@
-Version 0.2 ():
+Version 0.2 (07.06.2020):
   * Notification about every new login via SMTP.
   * Paramter _ALL that matches for all usernames.
+  * Support FreeBSD.
 
 Version 0.1 (24.04.2020):
   * Alpha release.
