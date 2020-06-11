@@ -27,11 +27,14 @@
 #include <security/pam_appl.h>
 #include <stdlib.h>
 
+#include "conv.h"
 #include "config.h"
 #include "log.h"
 #include "smtp.h"
 
+char *    conv_PIN(pam_handle_t *);
 int       email_login_notify(char *, char *, char *, char *, char *);
+int       email_pin(char *, char *, char *, char *, char *, char *);
 int       history(char *, char *, char *, char *, char *);
 void      print_list(node_t *);
 void      print_access(access_t *, char *);
@@ -40,8 +43,9 @@ node_t *  get_config(node_t *, char *, char *);
 void      slog(int, ...);
 void      debug(int, ...);
 void      debug_addr(void *, char *);
+void      debug_int(int, char *);
 access_t *create_access(access_t *, char *, char *, char *, node_t *);
-notify_t *create_notify(notify_t *, char *, node_t *);
+notify_t *create_notify(notify_t *, char *, char *, char *, node_t *);
 
 int DEBUG = 0;
 
@@ -81,8 +85,10 @@ user_list_checker(access_t *LIST, char *user)
 
 
 int
-mail_notify(notify_t *ntf, char *server, char *user, char *host, char *service)
+send_mail(notify_t *ntf, char *server, char *user, char *host, char *service, char *pin)
 {
+  int sent_mails = 0;
+
   while(ntf && ntf->mail && ntf->list){
     while(ntf->list) {
       if ((strncmp(ntf->list->user, user, strlen(user)) == 0) &&
@@ -90,13 +96,18 @@ mail_notify(notify_t *ntf, char *server, char *user, char *host, char *service)
 
         debug(2,"ntf->list->user = ", ntf->list->user);
         debug(2,"user = ", user);
-        email_login_notify(server, ntf->mail, host, user, service);
+        if (pin == NULL)
+          email_login_notify(server, ntf->mail, host, user, service);
+        else
+          email_pin(server, ntf->mail, host, user, service, pin);
+        /* TODO: add error handling for email funcions; return -1 */
+        sent_mails++;
       }
       ntf->list = ntf->list->next;
     }
     ntf = ntf->next;
   }
-  return 0;
+  return sent_mails;
 }
 
 
@@ -124,10 +135,12 @@ allow(pam_handle_t *pamh, char *service, char *user, char* host)
   access_t *OPEN   = NULL;
   access_t *CLOSE  = NULL;
   notify_t *NOTIFY = NULL;
+  notify_t *PIN    = NULL;
 
-  OPEN   = create_access(OPEN,  "open",  service, user, conf);
-  CLOSE  = create_access(CLOSE, "close", service, user, conf);
-  NOTIFY = create_notify(NOTIFY, service, conf);
+  OPEN   = create_access(OPEN,   "open",    service, user, conf);
+  CLOSE  = create_access(CLOSE,  "close",   service, user, conf);
+  NOTIFY = create_notify(NOTIFY, "notify:", service, user, conf);
+  PIN    = create_notify(PIN,    "pin:",    service, user, conf);
 
   if (DEBUG) {
     print_access(OPEN, "OPEN");
@@ -135,19 +148,44 @@ allow(pam_handle_t *pamh, char *service, char *user, char* host)
     debug(1,"=============================");
   }
 
-
+  /* CLOSE */
   if (user_list_checker(CLOSE, user))
     return PAM_AUTH_ERR;
 
+  /*  PIN  */
+  char *pin = "12345678"; /* TODO: char *pin_generate() */
+  debug(2, "generated PIN: ", pin);
+
+  int sent_mails = send_mail(PIN, def->MAILSERVER, user, host, service, pin);
+  if (sent_mails < 0) {
+    slog(1, "something goes wrong by sending PIN mail");
+    return PAM_AUTH_ERR;
+  }
+
+  if (sent_mails == 0)
+    debug(1, "nobody needs your PIN :)");
+
+  if (sent_mails > 0) {
+    debug_int(sent_mails, " PIN mail(s) sent successfully");
+    if (strncmp(pin, conv_PIN(pamh), 8) == 0) {
+      debug(1, "PIN (entered by user) is correct");
+      send_mail(NOTIFY, def->MAILSERVER, user, host, service, NULL);
+      return PAM_SUCCESS;
+    }
+    else
+      return PAM_AUTH_ERR;
+  }
+
+  /* OPEN */
   if (user_list_checker(OPEN, user)) {
-    mail_notify(NOTIFY, def->MAILSERVER, user, host, service);
+    send_mail(NOTIFY, def->MAILSERVER, user, host, service, NULL);
     return PAM_SUCCESS;
   }
 
   /* DEFAULT RULE */
   if ((strncmp(def->DEFAULT, "OPEN",  4) == 0) ||
       (strncmp(def->DEFAULT, "open",  4) == 0)) {
-    mail_notify(NOTIFY, def->MAILSERVER, user, host, service);
+    send_mail(NOTIFY, def->MAILSERVER, user, host, service, NULL);
     return PAM_SUCCESS;
   }
 
@@ -199,7 +237,7 @@ pam_sm_authenticate(pam_handle_t *pamh, int flags, int argc, const char **argv)
 
   if (ret == PAM_SUCCESS){
     slog(2, "access granted: user -> ", user);
-    history(service, "OPEN", host, user, "access granted (auth)");
+    history(service, "OPEN", host, user, "access granted (auth)"); /* TODO: history should support PIN*/
     return PAM_SUCCESS;
   }
 

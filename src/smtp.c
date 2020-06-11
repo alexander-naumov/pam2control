@@ -218,6 +218,43 @@ send_email(int sock, char *from, char *to, char *mail, int mail_len)
 }
 
 int
+email_pin(char *server, char *to, char *host, char *user, char *service, char *pin)
+{
+  int  sock  = 0;
+  char *mail = NULL;
+  char *subj = NULL;
+  char *body = NULL;
+  char *from = NULL;
+
+  char hostnm[HOSTLEN];
+  gethostname(hostnm, HOSTLEN);
+  char *hostname = hostnm;
+
+  asprintf(&from, "pam2control@%s", hostname);
+  asprintf(&subj, "[p2c] your PIN");
+  asprintf(&body, pin);
+  asprintf(&mail, "Subject: %s\r\n%s\r\n.\r\n", subj, body);
+
+  debug(2, "server = ", server);
+  if ((sock = connect_smtp(server, SMTP_PORT)) == -1)
+    slog(1, "connect to mail server FAILED");
+  else
+    debug(1, "successfully connected to mail server");
+
+  if (send_email(sock, from, to, mail, strlen(mail)) == -1)
+    slog(1, "something goes wrong by sending mail");
+  else
+    debug(1, "mail successfully sent");
+
+  free(mail);
+  free(subj);
+  free(body);
+  free(from);
+
+  return 0;
+}
+
+int
 email_login_notify(char *server, char *to, char *host, char *user, char *service)
 {
   int  sock  = 0;

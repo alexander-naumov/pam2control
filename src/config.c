@@ -164,9 +164,9 @@ push_access(access_t *head, char *user)
   return head;
 }
 
-
+/* TODO: support _ALL user */
 notify_t *
-create_notify(notify_t *head, char *service, node_t* conf)
+create_notify(notify_t *head, char *flavor, char *service, char *user, node_t* conf)
 {
   char *mail_list = NULL;
   char *mail      = NULL;
@@ -176,7 +176,7 @@ create_notify(notify_t *head, char *service, node_t* conf)
 
   while(conf) {
     if ((!strncmp(conf->service, service, strlen(service))) &&
-        (!strncmp(conf->option, "notify:", 7))              &&
+        (!strncmp(conf->option, flavor, strlen(flavor)))    &&
         (conf->param)){
 
           strtok(conf->option,":");
