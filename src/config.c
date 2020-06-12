@@ -164,7 +164,7 @@ push_access(access_t *head, char *user)
   return head;
 }
 
-/* TODO: support _ALL user */
+
 notify_t *
 create_notify(notify_t *head, char *flavor, char *service, char *user, node_t* conf)
 {
@@ -201,8 +201,12 @@ create_notify(notify_t *head, char *flavor, char *service, char *user, node_t* c
 
             while ((csv = strtok_r(param, ",", &param))) {
               debug(2, "csv = ", csv);
-              if (!strncmp(conf->target, "user", 4))
-                cur->list = push_access(cur->list, csv);
+              if (!strncmp(conf->target, "user", 4)) {
+                if (!strncmp(csv, "_ALL", 4))
+                  cur->list = push_access(cur->list, user);
+                else
+                  cur->list = push_access(cur->list, csv);
+              }
 
               if (!strncmp(conf->target, "group", 5)){
                 char **user_list = get_user_list_group(rmn(csv));
