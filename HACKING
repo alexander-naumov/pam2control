@@ -1,9 +1,4 @@
-Some notes on hacking the pam2control source.
-
-
-* For processing all main structs/data_types used linked lists. Be careful
-  with free(), since new objects can still need old memory areas.
-
+============== Some notes on hacking the pam2control source ==============
 
 * For small debuging stuff functions debug(), debug_addr() and debug_int()
   could be used. The differences are data types of arguments.
@@ -17,6 +12,10 @@ Some notes on hacking the pam2control source.
 
 * Function rmn() takes a pointer as an argument and returns the same pointer.
   It's not really necessary, but helps to be more function.
+
+
+* Take care about portability. There are some functions that not available
+  everywhere. Check it before to use it.
 
 
 * Function prototypes should not have variable names associated with the
