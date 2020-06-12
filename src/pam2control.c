@@ -164,8 +164,10 @@ allow(pam_handle_t *pamh, char *service, char *user, char* host)
   }
 
   /* CLOSE */
-  if (user_list_checker(CLOSE, user))
+  if (user_list_checker(CLOSE, user)){
+    history(service, "CLOSE", host, user, "access denied (block list)");
     return PAM_AUTH_ERR;
+  }
 
   /*  PIN  */
   char *pin = (char *)malloc(sizeof(char)*8);
@@ -186,15 +188,19 @@ allow(pam_handle_t *pamh, char *service, char *user, char* host)
     if (!strncmp(pin, conv_PIN(pamh), 8)) {
       debug(1, "PIN (entered by user) is correct");
       send_mail(NOTIFY, def->MAILSERVER, user, host, service, NULL);
+      history(service, "OPEN", host, user, "PIN confirmed");
       return PAM_SUCCESS;
     }
-    else
+    else {
+      history(service, "CLOSE", host, user, "wrong PIN provided");
       return PAM_AUTH_ERR;
+    }
   }
 
   /* OPEN */
   if (user_list_checker(OPEN, user)) {
     send_mail(NOTIFY, def->MAILSERVER, user, host, service, NULL);
+    history(service, "OPEN", host, user, "access granted");
     return PAM_SUCCESS;
   }
 
@@ -202,9 +208,11 @@ allow(pam_handle_t *pamh, char *service, char *user, char* host)
   if ((strncmp(def->DEFAULT, "OPEN",  4) == 0) ||
       (strncmp(def->DEFAULT, "open",  4) == 0)) {
     send_mail(NOTIFY, def->MAILSERVER, user, host, service, NULL);
+    history(service, "OPEN", host, user, "access granted (default rule)");
     return PAM_SUCCESS;
   }
 
+  history(service, "CLOSE", host, user, "access denied (default rule)");
   return PAM_AUTH_ERR;
 }
 
@@ -252,13 +260,11 @@ pam_sm_authenticate(pam_handle_t *pamh, int flags, int argc, const char **argv)
   ret = allow(pamh, service, user, host);
 
   if (ret == PAM_SUCCESS){
-    slog(2, "access granted: user -> ", user);
-    history(service, "OPEN", host, user, "access granted (auth)"); /* TODO: history should support PIN*/
+    slog(1, "access granted");
     return PAM_SUCCESS;
   }
 
-  slog(2, "access denied: user -> ", user);
-  history(service, "CLOSE", host, user, "access denied (auth)");
+  slog(1, "access denied");
   return ret;
 }
 
