@@ -32,6 +32,7 @@
 #include "log.h"
 #include "smtp.h"
 
+char *    pin_generate(char *);
 char *    conv_PIN(pam_handle_t *);
 int       email_login_notify(char *, char *, char *, char *, char *);
 int       email_pin(char *, char *, char *, char *, char *, char *);
@@ -58,6 +59,20 @@ rmn(char *str)
   if (str[length-1] == '\n')
     str[length-1] = '\0';
   return str;
+}
+
+
+char *
+pin_generate(char *pin)
+{
+  ssize_t randval;
+  FILE *fd;
+  fd = fopen("/dev/urandom", "r");
+  fread(&randval, sizeof(randval), 1, fd);
+  fclose(fd);
+
+  snprintf(pin, 9, "%zu", randval);
+  return pin;
 }
 
 
@@ -153,7 +168,8 @@ allow(pam_handle_t *pamh, char *service, char *user, char* host)
     return PAM_AUTH_ERR;
 
   /*  PIN  */
-  char *pin = "12345678"; /* TODO: char *pin_generate() */
+  char *pin = (char *)malloc(sizeof(char)*8);
+  pin = pin_generate(pin);
   debug(2, "generated PIN: ", pin);
 
   int sent_mails = send_mail(PIN, def->MAILSERVER, user, host, service, pin);
@@ -167,7 +183,7 @@ allow(pam_handle_t *pamh, char *service, char *user, char* host)
 
   if (sent_mails > 0) {
     debug_int(sent_mails, " PIN mail(s) sent successfully");
-    if (strncmp(pin, conv_PIN(pamh), 8) == 0) {
+    if (!strncmp(pin, conv_PIN(pamh), 8)) {
       debug(1, "PIN (entered by user) is correct");
       send_mail(NOTIFY, def->MAILSERVER, user, host, service, NULL);
       return PAM_SUCCESS;

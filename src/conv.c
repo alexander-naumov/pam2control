@@ -67,7 +67,7 @@ conv_PIN(pam_handle_t *pamh)
   if (response)
     pin = strndup(response->resp, 8);
 
-  debug(2, "conv: entered pin -> ", pin);
+  debug(3, "conv: entered pin -> '", pin, "'");
 
   free(response);
   free(msg_tmp);
