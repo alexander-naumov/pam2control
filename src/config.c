@@ -36,7 +36,7 @@ void  debug_addr(void *, char *);
 void  debug_int(int, char *);
 char *rmn(char *);
 
-const char *log_path;
+const char *log_path_conf;
 
 int
 length(struct node* head)
@@ -398,7 +398,7 @@ get_default(settings_t *def)
       def->LOGFILE = strdup(pch);
       rmn(def->LOGFILE);
     }
-    log_path = def->LOGFILE;
+    log_path_conf = def->LOGFILE;
   }
   fclose(stream);
 }
