@@ -66,53 +66,26 @@ print_access(access_t *LIST, char *flavor)
   }
 }
 
+
 void
 print_list(node_t *cur)
 {
   char *log_node = NULL;
-
-  char *cur_service= "Service:   ";
-  char *cur_option = "\nOption:    ";
-  char *cur_target = "\nTarget:    ";
-  char *cur_param  = "\nParameters:";
-
   while (cur != NULL) {
-    log_node = (char *)malloc(
-	  strlen(cur_service) +
-	  strlen(cur_option) +
-	  strlen(cur_target) +
-	  strlen(cur_param) +
-
-	  strlen(cur->service) +
-	  strlen(cur->option) +
-	  strlen(cur->target) +
-	  strlen(cur->param) + 1);
-
-    if (log_node) {
-	  strcpy(log_node, cur_service);
-	  strcat(log_node, cur->service);
-
-	  strcat(log_node, cur_option);
-	  strcat(log_node, cur->option);
-
-	  strcat(log_node, cur_target);
-	  strcat(log_node, cur->target);
-
-	  strcat(log_node, cur_param);
-	  strcat(log_node, cur->param);
-    }
-    else
-      debug(1,"conf: print_list, can't allocate memory");
-
+    asprintf(&log_node, "Service:    %s\n"
+                        "Option:     %s\n"
+                        "Target:     %s\n"
+                        "Parameters: %s",
+                         cur->service,
+                         cur->option,
+                         cur->target,
+                         cur->param);
     debug(1, log_node);
     debug(1,"-------------");
-
-    if (cur->next != NULL)
-      cur = cur->next;
-    else
-      return;
+    cur = cur->next;
   }
   free(log_node);
+  return;
 }
 
 
