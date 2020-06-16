@@ -251,9 +251,9 @@ create_access(access_t *head, char *flavor, char *service, char *user, node_t* c
         (!strncmp(conf->option, flavor, strlen(flavor)))    &&
         (conf->param)){
 
-          csv = strtok (conf->param,",");
-          while (csv) {
+          while ((csv = strtok_r(conf->param, ",", &conf->param))) {
             debug(2, "csv = ", csv);
+
             if (!strncmp(conf->target, "user", 4)) {
               if (!strncmp(csv, "_ALL", 4))
                 cur = push_access(cur, user);
@@ -266,15 +266,16 @@ create_access(access_t *head, char *flavor, char *service, char *user, node_t* c
 
               if (user_list)
                 while (*user_list != NULL) {
-                  char *name = (char *)malloc(strlen(*user_list) + 1);
-                  strcpy(name, *user_list);
-                  cur = push_access(cur, name);
+                  cur = push_access(cur, *user_list);
+
+                  if (!head)
+                    head = cur;
+
                   user_list++;
                 }
             }
             if (!head)
               head = cur;
-            csv = strtok (NULL,",");
           }
     }
     if (!head)
