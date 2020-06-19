@@ -36,7 +36,7 @@ endif
 
 
 clean:
-	rm -f $(OBJ)
+	rm -f $(OBJ) pam2control.so
 
 
 uninstall:

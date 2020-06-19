@@ -66,53 +66,26 @@ print_access(access_t *LIST, char *flavor)
   }
 }
 
+
 void
 print_list(node_t *cur)
 {
   char *log_node = NULL;
-
-  char *cur_service= "Service:   ";
-  char *cur_option = "\nOption:    ";
-  char *cur_target = "\nTarget:    ";
-  char *cur_param  = "\nParameters:";
-
   while (cur != NULL) {
-    log_node = (char *)malloc(
-	  strlen(cur_service) +
-	  strlen(cur_option) +
-	  strlen(cur_target) +
-	  strlen(cur_param) +
-
-	  strlen(cur->service) +
-	  strlen(cur->option) +
-	  strlen(cur->target) +
-	  strlen(cur->param) + 1);
-
-    if (log_node) {
-	  strcpy(log_node, cur_service);
-	  strcat(log_node, cur->service);
-
-	  strcat(log_node, cur_option);
-	  strcat(log_node, cur->option);
-
-	  strcat(log_node, cur_target);
-	  strcat(log_node, cur->target);
-
-	  strcat(log_node, cur_param);
-	  strcat(log_node, cur->param);
-    }
-    else
-      debug(1,"conf: print_list, can't allocate memory");
-
+    asprintf(&log_node, "Service:    %s\n"
+                        "Option:     %s\n"
+                        "Target:     %s\n"
+                        "Parameters: %s",
+                         cur->service,
+                         cur->option,
+                         cur->target,
+                         cur->param);
     debug(1, log_node);
     debug(1,"-------------");
-
-    if (cur->next != NULL)
-      cur = cur->next;
-    else
-      return;
+    cur = cur->next;
   }
   free(log_node);
+  return;
 }
 
 
@@ -251,9 +224,9 @@ create_access(access_t *head, char *flavor, char *service, char *user, node_t* c
         (!strncmp(conf->option, flavor, strlen(flavor)))    &&
         (conf->param)){
 
-          csv = strtok (conf->param,",");
-          while (csv) {
+          while ((csv = strtok_r(conf->param, ",", &conf->param))) {
             debug(2, "csv = ", csv);
+
             if (!strncmp(conf->target, "user", 4)) {
               if (!strncmp(csv, "_ALL", 4))
                 cur = push_access(cur, user);
@@ -266,15 +239,16 @@ create_access(access_t *head, char *flavor, char *service, char *user, node_t* c
 
               if (user_list)
                 while (*user_list != NULL) {
-                  char *name = (char *)malloc(strlen(*user_list) + 1);
-                  strcpy(name, *user_list);
-                  cur = push_access(cur, name);
+                  cur = push_access(cur, *user_list);
+
+                  if (!head)
+                    head = cur;
+
                   user_list++;
                 }
             }
             if (!head)
               head = cur;
-            csv = strtok (NULL,",");
           }
     }
     if (!head)
