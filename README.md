@@ -3,12 +3,12 @@
 
 pam2control, commonly known as p2c, is the easily configurable system to
 control access to host by using PAM interfaces.
-It makes it possible to manages access for some users (or group of users)
-just by adding one single line to the config file.
+It makes it possible to manages access for some users (or group of users;
+LDAP is supported) just by adding one single line to the config file.
 It can notify you by sending an email if somebody login on server.
 It uses syslog and also its own logfile for every login-/logout-events.
 
-It's implemented in C and supports FreeBSD and GNU/Linux systems.
+It supports FreeBSD and GNU/Linux systems.
 
 ## Installing pam2control
 ```
