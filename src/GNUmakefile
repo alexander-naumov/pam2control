@@ -14,6 +14,13 @@ ifeq ($(shell cat /etc/issue | cut -d " " -f 1), Debian)
 	LIB_PATH=/lib
 endif
 
+ifeq ($(shell cat /etc/issue | cut -d " " -f 1), Ubuntu)
+	ifeq ($(shell uname -m), x86_64)
+		LIB_PATH=/usr/lib/x86_64-linux-gnu
+	else
+		LIB_PATH=/usr/lib/i386-linux-gnu
+	endif
+endif
 
 pam2control: $(OBJ)
 	$(CC) -Wall -fPIC -c pam2control.c config.c log.c smtp.c conv.c
