@@ -152,10 +152,23 @@ check_status(char *recv_str)
 
 
 int
-send_email(int sock, char *from, char *to, char *mail, int mail_len)
+send_email(int sock, char *server, char *from, char *to, char *mail, int mail_len)
 {
   int ret, err = 0;
   char data[SMTP_MTU] = {0};
+
+  /* === EHLO ============================================= */
+  memset(&data, 0, SMTP_MTU);
+  sprintf(data, "EHLO %s\r\n", server);
+  socket_io(SOCK_WRITE, sock, data, strlen(data));
+
+  memset(&data, 0, SMTP_MTU);
+  socket_io(SOCK_READ, sock, data, SMTP_MTU);
+
+  debug(2, "EHLO answer: ", data);
+  if ((ret = check_status(data)) == -1)
+    err = ret;
+
 
   /* === MAIL FROM ======================================== */
   memset(&data, 0, SMTP_MTU);
@@ -241,7 +254,7 @@ email_pin(char *server, char *to, char *host, char *user, char *service, char *p
   else
     debug(1, "successfully connected to mail server");
 
-  if (send_email(sock, from, to, mail, strlen(mail)) == -1)
+  if (send_email(sock, server, from, to, mail, strlen(mail)) == -1)
     slog(1, "something goes wrong by sending mail");
   else
     debug(1, "mail successfully sent");
@@ -280,7 +293,7 @@ email_login_notify(char *server, char *to, char *host, char *user, char *service
   else
     debug(1, "successfully connected to mail server");
 
-  if (send_email(sock, from, to, mail, strlen(mail)) == -1)
+  if (send_email(sock, server, from, to, mail, strlen(mail)) == -1)
     slog(1, "something goes wrong by sending mail");
   else
     debug(1, "mail successfully sent");
