@@ -30,10 +30,9 @@
 #include<errno.h>
 #include<time.h>
 
+#include "log.h"
 #include "pam2control.h"
 
-const char *log_path;
-const char *log_proc;
 
 void
 debug_int(int number, char *str)
