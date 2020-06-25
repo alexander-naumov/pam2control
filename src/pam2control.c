@@ -49,7 +49,7 @@ access_t *create_access(access_t *, char *, char *, char *, node_t *);
 notify_t *create_notify(notify_t *, char *, char *, char *, node_t *);
 
 int DEBUG = 0;
-const char *log_proc;
+char *log_proc;
 
 char *
 rmn(char *str)

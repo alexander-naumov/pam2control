@@ -22,6 +22,6 @@
 #ifndef LOG_H
 #define LOG_H
 
-extern const char *log_proc;
-extern const char *log_path;
+extern char *log_proc;
+extern char *log_path;
 #endif
