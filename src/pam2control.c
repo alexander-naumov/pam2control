@@ -38,7 +38,8 @@ int       email_login_notify(char *, char *, char *, char *, char *);
 int       email_pin(char *, char *, char *, char *, char *, char *);
 int       history(char *, char *, char *, char *, char *);
 void      print_list(node_t *);
-void      print_access(access_t *, char *);
+void      print_access(access_t *);
+void      print_notify(notify_t *);
 void      get_default(settings_t *);
 node_t *  get_config(node_t *, char *, char *);
 void      slog(int, ...);
@@ -159,9 +160,19 @@ allow(pam_handle_t *pamh, char *service, char *user, char* host)
   PIN    = create_notify(PIN,    "pin:",    service, user, conf);
 
   if (DEBUG) {
-    print_access(OPEN, "OPEN");
-    print_access(CLOSE,"CLOSE");
-    debug(1,"=============================");
+    debug(1, "=== ACCESS LIST: OPEN ==========");
+    print_access(OPEN);
+
+    debug(1, "=== ACCESS LIST: CLOSE =========");
+    print_access(CLOSE);
+
+    debug(1, "=== ACCESS LIST: PIN ===========");
+    print_notify(PIN);
+
+    debug(1, "=== ACCESS LIST: NOTIFY ========");
+    print_notify(NOTIFY);
+
+    debug(1,"================================");
   }
 
   /* CLOSE */

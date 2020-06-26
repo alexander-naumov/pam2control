@@ -52,9 +52,8 @@ length(struct node* head)
 
 
 void
-print_access(access_t *LIST, char *flavor)
+print_access(access_t *LIST)
 {
-  debug(3, "==== ACCESS ", flavor, " ===========");
   if (LIST == NULL) {
     debug(1, "NULL...");
     return;
@@ -63,6 +62,22 @@ print_access(access_t *LIST, char *flavor)
   while(LIST) {
     debug_addr(LIST, LIST->user);
     LIST = LIST->next;
+  }
+}
+
+
+void
+print_notify(notify_t *N)
+{
+  if (N == NULL) {
+    debug(1, "NULL...");
+    return;
+  }
+
+  while(N) {
+    debug(2, "=> ", N->mail);
+    print_access(N->list);
+    N = N->next;
   }
 }
 
