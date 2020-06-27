@@ -182,30 +182,32 @@ allow(pam_handle_t *pamh, char *service, char *user, char* host)
   }
 
   /*  PIN  */
-  char *pin = (char *)malloc(sizeof(char)*8);
-  pin = pin_generate(pin);
-  debug(2, "generated PIN: ", pin);
+  if (PIN) {
+    char *pin = (char *)malloc(sizeof(char)*8);
+    pin = pin_generate(pin);
+    debug(2, "generated PIN: ", pin);
 
-  int sent_mails = send_mail(PIN, def->MAILSERVER, user, host, service, pin);
-  if (sent_mails < 0) {
-    slog(1, "something goes wrong by sending PIN mail");
-    return PAM_AUTH_ERR;
-  }
-
-  if (sent_mails == 0)
-    debug(1, "nobody needs your PIN :)");
-
-  if (sent_mails > 0) {
-    debug_int(sent_mails, " PIN mail(s) sent successfully");
-    if (!strncmp(pin, conv_PIN(pamh), 8)) {
-      debug(1, "PIN (entered by user) is correct");
-      send_mail(NOTIFY, def->MAILSERVER, user, host, service, NULL);
-      history(service, "OPEN", host, user, "PIN confirmed");
-      return PAM_SUCCESS;
-    }
-    else {
-      history(service, "CLOSE", host, user, "wrong PIN provided");
+    int sent_mails = send_mail(PIN, def->MAILSERVER, user, host, service, pin);
+    if (sent_mails < 0) {
+      slog(1, "something goes wrong by sending PIN mail");
       return PAM_AUTH_ERR;
+    }
+
+    if (sent_mails == 0)
+      debug(1, "nobody needs your PIN :)");
+
+    if (sent_mails > 0) {
+      debug_int(sent_mails, " PIN mail(s) sent successfully");
+      if (!strncmp(pin, conv_PIN(pamh), 8)) {
+        debug(1, "PIN (entered by user) is correct");
+        send_mail(NOTIFY, def->MAILSERVER, user, host, service, NULL);
+        history(service, "OPEN", host, user, "PIN confirmed");
+        return PAM_SUCCESS;
+      }
+      else {
+        history(service, "CLOSE", host, user, "wrong PIN provided");
+        return PAM_AUTH_ERR;
+      }
     }
   }
 
