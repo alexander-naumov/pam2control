@@ -114,11 +114,9 @@ send_mail(notify_t *ntf, char *server, char *user, char *host, char *service, ch
         debug(2,"ntf->list->user = ", ntf->list->user);
         debug(2,"user = ", user);
         if (pin == NULL)
-          email_login_notify(server, ntf->mail, host, user, service);
+          sent_mails = email_login_notify(server, ntf->mail, host, user, service);
         else
-          email_pin(server, ntf->mail, host, user, service, pin);
-        /* TODO: add error handling for email funcions; return -1 */
-        sent_mails++;
+          sent_mails = email_pin(server, ntf->mail, host, user, service, pin);
       }
       ntf->list = ntf->list->next;
     }
@@ -188,13 +186,11 @@ allow(pam_handle_t *pamh, char *service, char *user, char* host)
     debug(2, "generated PIN: ", pin);
 
     int sent_mails = send_mail(PIN, def->MAILSERVER, user, host, service, pin);
-    if (sent_mails < 0) {
-      slog(1, "something goes wrong by sending PIN mail");
+    if (sent_mails == 0) {
+      slog(1, "something went wrong by sending PIN mail");
+      history(service, "CLOSE", host, user, "PIN can not be send");
       return PAM_AUTH_ERR;
     }
-
-    if (sent_mails == 0)
-      debug(1, "nobody needs your PIN :)");
 
     if (sent_mails > 0) {
       debug_int(sent_mails, " PIN mail(s) sent successfully");

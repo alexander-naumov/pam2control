@@ -154,7 +154,6 @@ check_status(char *recv_str)
 int
 send_email(int sock, char *server, char *from, char *to, char *mail, int mail_len)
 {
-  int ret, err = 0;
   char data[SMTP_MTU] = {0};
 
   /* === EHLO ============================================= */
@@ -166,8 +165,8 @@ send_email(int sock, char *server, char *from, char *to, char *mail, int mail_le
   socket_io(SOCK_READ, sock, data, SMTP_MTU);
 
   debug(2, "EHLO answer: ", data);
-  if ((ret = check_status(data)) == -1)
-    err = ret;
+  if (check_status(data) == -1)
+    return -1;
 
 
   /* === MAIL FROM ======================================== */
@@ -179,8 +178,8 @@ send_email(int sock, char *server, char *from, char *to, char *mail, int mail_le
   socket_io(SOCK_READ, sock, data, SMTP_MTU);
 
   debug(2, "MAIL FROM answer: ", data);
-  if ((ret = check_status(data)) == -1)
-    err = ret;
+  if (check_status(data) == -1)
+    return -1;
 
 
   /* === RCPT TO ========================================== */
@@ -192,8 +191,8 @@ send_email(int sock, char *server, char *from, char *to, char *mail, int mail_le
   socket_io(SOCK_READ, sock, data, SMTP_MTU);
 
   debug(2, "RCPT TO answer: ", data);
-  if ((ret = check_status(data)) == -1)
-    err = ret;
+  if (check_status(data) == -1)
+    return -1;
 
   /* === DATA ============================================= */
   memset(&data, 0, SMTP_MTU);
@@ -203,8 +202,8 @@ send_email(int sock, char *server, char *from, char *to, char *mail, int mail_le
   socket_io(SOCK_READ, sock, data, SMTP_MTU);
 
   debug(2, "DATA answer: ", data);
-  if ((ret = check_status(data)) == -1)
-    err = ret;
+  if (check_status(data) == -1)
+    return -1;
 
   /* === MAIL TEXT ======================================== */
   socket_io(SOCK_WRITE, sock, mail, mail_len);
@@ -213,8 +212,8 @@ send_email(int sock, char *server, char *from, char *to, char *mail, int mail_le
   socket_io(SOCK_READ, sock, data, SMTP_MTU);
 
   debug(2, "MAIL answer: ", data);
-  if ((ret = check_status(data)) == -1)
-    err = ret;
+  if (check_status(data) == -1)
+    return -1;
 
   /* === QUIT ============================================= */
   memset(&data, 0, SMTP_MTU);
@@ -224,15 +223,16 @@ send_email(int sock, char *server, char *from, char *to, char *mail, int mail_le
   socket_io(SOCK_READ, sock, data, SMTP_MTU);
 
   debug(2, "QUIT answer: ", data);
-  if ((ret = check_status(data)) == -1)
-    err = ret;
+  if (check_status(data) == -1)
+    return -1;
 
-  return err;
+  return 0;
 }
 
 int
 email_pin(char *server, char *to, char *host, char *user, char *service, char *pin)
 {
+  int  ret   = 0;
   int  sock  = 0;
   char *mail = NULL;
   char *subj = NULL;
@@ -256,20 +256,23 @@ email_pin(char *server, char *to, char *host, char *user, char *service, char *p
 
   if (send_email(sock, server, from, to, mail, strlen(mail)) == -1)
     slog(1, "something goes wrong by sending mail");
-  else
+  else {
     debug(1, "mail successfully sent");
+    ret++;
+    }
 
   free(mail);
   free(subj);
   free(body);
   free(from);
 
-  return 0;
+  return ret;
 }
 
 int
 email_login_notify(char *server, char *to, char *host, char *user, char *service)
 {
+  int  ret   = 0;
   int  sock  = 0;
   char *mail = NULL;
   char *subj = NULL;
@@ -295,13 +298,15 @@ email_login_notify(char *server, char *to, char *host, char *user, char *service
 
   if (send_email(sock, server, from, to, mail, strlen(mail)) == -1)
     slog(1, "something goes wrong by sending mail");
-  else
+  else {
     debug(1, "mail successfully sent");
+    ret++;
+    }
 
   free(mail);
   free(subj);
   free(body);
   free(from);
 
-  return 0;
+  return ret;
 }
