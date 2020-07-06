@@ -36,7 +36,6 @@ char *
 conv_PIN(pam_handle_t *pamh)
 {
   char  *pin = NULL;
-
   struct pam_conv     *pam_convp;
   struct pam_message  *msg_tmp;
   struct pam_response *response = NULL;
@@ -61,12 +60,14 @@ conv_PIN(pam_handle_t *pamh)
   msg_tmp->msg       = (char *)"PIN: ";
 
   const struct pam_message *msg = msg_tmp; 
-
   (pam_convp->conv)(1, &msg, &response, pam_convp->appdata_ptr);
 
   if (response)
     pin = strndup(response->resp, 8);
-
+  else {
+    debug(1, "pam_convp->conv: NO RESPONCE!");
+    pin = (char *)"ERRORPIN";
+  }
   debug(3, "conv: entered pin -> '", pin, "'");
 
   free(response);
