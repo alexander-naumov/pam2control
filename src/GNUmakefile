@@ -10,16 +10,12 @@ else
 	LIB_PATH = /lib
 endif
 
-ifeq ($(shell cat /etc/issue | cut -d " " -f 1), Debian)
-	LIB_PATH=/lib
+ifneq (,$(wildcard $(/lib/x86_64-linux-gnu))","")
+	LIB_PATH = /lib/x86_64-linux-gnu
 endif
 
-ifeq ($(shell cat /etc/issue | cut -d " " -f 1), Ubuntu)
-	ifeq ($(shell uname -m), x86_64)
-		LIB_PATH=/usr/lib/x86_64-linux-gnu
-	else
-		LIB_PATH=/usr/lib/i386-linux-gnu
-	endif
+ifneq (,$(wildcard $(/usr/lib/i386-linux-gnu))","")
+	LIB_PATH = /usr/lib/i386-linux-gnu
 endif
 
 pam2control: $(OBJ)
