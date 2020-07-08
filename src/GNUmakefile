@@ -14,6 +14,14 @@ ifeq ($(shell cat /etc/issue | cut -d " " -f 1), Debian)
 	LIB_PATH=/lib
 endif
 
+ifeq ($(shell cat /etc/issue | cut -d " " -f 1), Devuan)
+       ifeq ($(shell uname -m), x86_64)
+               LIB_PATH=/lib/x86_64-linux-gnu
+       else
+               LIB_PATH=/lib/i386-linux-gnu
+       endif
+endif
+
 ifeq ($(shell cat /etc/issue | cut -d " " -f 1), Ubuntu)
 	ifeq ($(shell uname -m), x86_64)
 		LIB_PATH=/usr/lib/x86_64-linux-gnu
