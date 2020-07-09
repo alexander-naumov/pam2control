@@ -1,8 +1,8 @@
 # pam2control
 [![Build Status](https://travis-ci.org/alexander-naumov/pam2control.svg?branch=master)](https://travis-ci.org/alexander-naumov/pam2control)
 
-pam2control, commonly known as p2c, is the easily configurable system to
-control access to host by using PAM interfaces.
+pam2control, commonly known as p2c, is the easily configurable PAM-based
+authentication provider.
 It makes it possible to manages access for some users (or group of users;
 LDAP is supported) just by adding one single line to the config file.
 It can notify you by sending an email if somebody login on server.
