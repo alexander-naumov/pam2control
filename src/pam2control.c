@@ -230,33 +230,18 @@ allow(pam_handle_t *pamh, char *service, char *user, char* host)
 int
 pam_sm_open_session(pam_handle_t *pamh, int flags, int argc, const char **argv)
 {
-  char *user    = NULL;
-  char *service = NULL;
-
-  (void) pam_get_user(pamh, (const char **) &user, NULL);
-  (void) pam_get_item(pamh, PAM_SERVICE, (const void **) &service);
-
-  asprintf(&log_proc, "pam2control(%s:%s)", service, user);
-  slog(1, "==== open new session =========================");
-  return PAM_SUCCESS;
-}
-
-
-int
-pam_sm_authenticate(pam_handle_t *pamh, int flags, int argc, const char **argv)
-{
   int ret = PAM_AUTH_ERR;
 
-  char *service = NULL;
   char *user    = NULL;
+  char *service = NULL;
   char *host    = NULL;
 
-  (void) pam_get_user(pamh, (const char **) &user, NULL); 
+  (void) pam_get_user(pamh, (const char **) &user, NULL);
   (void) pam_get_item(pamh, PAM_SERVICE, (const void **) &service);
   (void) pam_get_item(pamh, PAM_RHOST, (const void **) &host);
 
   asprintf(&log_proc, "pam2control(%s:%s)", service, user);
-  slog(1, "==== authentication phase =====================");
+  slog(1, "==== open new session =========================");
 
   for (int i = 0; i<argc; i++)
   {
@@ -276,6 +261,22 @@ pam_sm_authenticate(pam_handle_t *pamh, int flags, int argc, const char **argv)
 
   slog(1, "access denied");
   return ret;
+}
+
+
+int
+pam_sm_authenticate(pam_handle_t *pamh, int flags, int argc, const char **argv)
+{
+
+  char *service = NULL;
+  char *user    = NULL;
+
+  (void) pam_get_user(pamh, (const char **) &user, NULL);
+  (void) pam_get_item(pamh, PAM_SERVICE, (const void **) &service);
+
+  asprintf(&log_proc, "pam2control(%s:%s)", service, user);
+  slog(1, "==== authentication phase =====================");
+  return PAM_SUCCESS;
 }
 
 
