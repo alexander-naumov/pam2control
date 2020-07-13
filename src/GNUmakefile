@@ -1,42 +1,21 @@
-CC=     gcc
-LIBS=   -lpam
-OBJ=    pam2control.o config.o log.o smtp.o conv.o
+CC=	gcc
+LIBS=	-lpam
+OBJ= 	pam2control.o config.o log.o smtp.o conv.o
+BIN=	/usr/sbin
 
-ifeq ($(shell uname -m), x86_64)
-	LIB_PATH = /lib64
-else ifeq ($(shell uname -m), aarch64)
-	LIB_PATH = /lib/aarch64-linux-gnu
-else
-	LIB_PATH = /lib
-endif
-
-ifeq ($(shell cat /etc/issue | cut -d " " -f 1), Debian)
-	LIB_PATH=/lib
-endif
-
-ifeq ($(shell cat /etc/issue | cut -d " " -f 1), Devuan)
-       ifeq ($(shell uname -m), x86_64)
-               LIB_PATH=/lib/x86_64-linux-gnu
-       else
-               LIB_PATH=/lib/i386-linux-gnu
-       endif
-endif
-
-ifeq ($(shell cat /etc/issue | cut -d " " -f 1), Ubuntu)
-	ifeq ($(shell uname -m), x86_64)
-		LIB_PATH=/usr/lib/x86_64-linux-gnu
-	else
-		LIB_PATH=/usr/lib/i386-linux-gnu
-	endif
-endif
+all: pam2control p2ctl
 
 pam2control: $(OBJ)
 	$(CC) -Wall -fPIC -c pam2control.c config.c log.c smtp.c conv.c
 	$(CC) -shared -o pam2control.so $(OBJ) $(LIBS)
 
+p2ctl: p2ctl.c
+	$(CC) -Wall p2ctl.c -o p2ctl
+
 
 install:
-	install -m 755 pam2control.so $(LIB_PATH)/security/
+	install -m 750 p2ctl $(BIN)
+	install -m 755 pam2control.so $(shell ./p2ctl search_path)
 	mkdir -p /etc/pam2control
 	mkdir -p /var/log/pam2control
 	mkdir -p /usr/share/man/man5/
@@ -51,10 +30,11 @@ endif
 
 
 clean:
-	rm -f $(OBJ) pam2control.so
+	rm -f $(OBJ) pam2control.so p2ctl
 
 
 uninstall:
 	rm -rf /etc/pam2control/
 	rm -rf /usr/share/man/man5/p2c.conf.5.gz
-	rm -rf $(LIB_PATH)/security/pam2control.so
+	rm -rf $(shell p2ctl search_path)/pam2control.so
+	rm -rf $(BIN)/p2ctl
