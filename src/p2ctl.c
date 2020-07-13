@@ -61,10 +61,7 @@ modules_search(char *PATH[])
       (void) closedir (dp);
     }
   }
-  else
-    modules_search(&PATH[1]);
-
-  /* TODO: warning: control reaches end of non-void function [-Wreturn-type] */
+  return modules_search(&PATH[1]);
 }
 
 
