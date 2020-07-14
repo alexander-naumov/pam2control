@@ -82,7 +82,7 @@ debug(int arg_count, ...)
     }
   }
   openlog (log_proc, LOG_CONS | LOG_PID | LOG_NDELAY, LOG_LOCAL1);
-  syslog (LOG_INFO, LOG);
+  syslog (LOG_INFO, "%s", LOG);
   va_end(ap);
   free(LOG);
 }
@@ -114,7 +114,7 @@ slog(int arg_count, ...)
     }
   }
   openlog (log_proc, LOG_CONS | LOG_PID | LOG_NDELAY, LOG_LOCAL1);
-  syslog (LOG_INFO, LOG);
+  syslog (LOG_INFO, "%s", LOG);
   va_end(ap);
   free(LOG);
 }

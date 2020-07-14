@@ -245,7 +245,7 @@ email_pin(char *server, char *to, char *host, char *user, char *service, char *p
 
   asprintf(&from, "pam2control@%s", hostname);
   asprintf(&subj, "[p2c] your PIN");
-  asprintf(&body, pin);
+  asprintf(&body, "%s", pin);
   asprintf(&mail, "Subject: %s\r\n%s\r\n.\r\n", subj, body);
 
   debug(2, "server = ", server);
