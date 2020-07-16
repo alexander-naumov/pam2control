@@ -31,7 +31,8 @@ char *pam_path[] = {
   "/lib/x86_64-linux-gnu\0",
   "/lib/i386-linux-gnu\0",
   "/usr/lib/x86_64-linux-gnu\0",
-  "/usr/lib/i386-linux-gnu\0"
+  "/usr/lib/i386-linux-gnu\0",
+  "/usr/lib\0"                   /* FreeBSD */
 };
 
 void
