@@ -36,5 +36,5 @@ clean:
 uninstall:
 	rm -rf /etc/pam2control/
 	rm -rf /usr/share/man/man5/p2c.conf.5.gz
-	rm -rf ${shell p2ctl search_path}/pam2control.so
+	rm -rf `p2ctl search_path`/pam2control.so
 	rm -rf ${BIN}/p2ctl
