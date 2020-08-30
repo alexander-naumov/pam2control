@@ -1,6 +1,6 @@
 language:   c
 os:         linux
-dist:       xenial
+dist:       focal
 #sudo:       false
 compiler:
   - gcc
@@ -17,3 +17,6 @@ script:
   - ls -la pam2control.so
   - file pam2control.so
   - nm pam2control.so
+  - ls -la p2ctl
+  - file p2ctl
+  - nm p2ctl
