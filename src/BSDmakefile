@@ -1,7 +1,7 @@
 CC=     clang
 LIBS=   -lpam
 OBJ=    pam2control.o config.o log.o smtp.o conv.o
-BIN=	/usr/sbin
+SBIN=	/usr/sbin
 
 all: pam2control p2ctl
 
@@ -12,10 +12,15 @@ pam2control: ${OBJ}
 p2ctl: p2ctl.c
 	${CC} -Wall p2ctl.c -o p2ctl
 
+.if make(install)
+PAM_PATH != ./p2ctl search_path
+.elif make(uninstall)
+PAM_PATH != ${SBIN}/p2ctl search_path
+.endif
 
 install:
-	install -m 750 p2ctl ${BIN}
-	install -m 755 pam2control.so `p2ctl search_path`
+	install -m 750 p2ctl ${SBIN}
+	install -m 755 pam2control.so ${PAM_PATH}
 	mkdir -p /etc/pam2control
 	mkdir -p /var/log/pam2control
 	mkdir -p /usr/share/man/man5/
@@ -36,5 +41,5 @@ clean:
 uninstall:
 	rm -rf /etc/pam2control/
 	rm -rf /usr/share/man/man5/p2c.conf.5.gz
-	rm -rf `p2ctl search_path`/pam2control.so
-	rm -rf ${BIN}/p2ctl
+	rm -rf ${PAM_PATH}/pam2control.so
+	rm -rf ${SBIN}/p2ctl
