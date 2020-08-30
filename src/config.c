@@ -37,6 +37,7 @@ void  debug_int(int, char *);
 char *rmn(char *);
 
 const char *log_path;
+const char *foutput;
 
 int
 length(struct node* head)
@@ -357,6 +358,7 @@ get_default(settings_t *def)
   def->MAILSERVER = "localhost";
   def->DEFAULT = "CLOSE";
   def->LOGFILE = "/var/log/pam2control/p2c";
+  def->FILEOUTPUT = NULL;
 
   stream = fopen(CONFFILE, "r");
   if (stream == NULL) {
@@ -381,6 +383,13 @@ get_default(settings_t *def)
       def->DEFAULT = strdup(pch);
       rmn(def->DEFAULT);
     }
+
+    if (strncmp("FILEOUTPUT", pch, 10) == 0) {
+      pch = strtok (NULL, ":");
+      def->FILEOUTPUT = strdup(pch);
+      rmn(def->FILEOUTPUT);
+    }
+    foutput = def->FILEOUTPUT;
 
     if (strncmp("LOGFILE", pch, 7) == 0) {
       pch = strtok (NULL, ":");

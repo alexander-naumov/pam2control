@@ -40,6 +40,7 @@ typedef struct settings {
     char *DEFAULT;
     char *LOGFILE;
     char *MAILSERVER;
+    char *FILEOUTPUT;
 } settings_t;
 
 typedef struct node {

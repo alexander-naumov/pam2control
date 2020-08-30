@@ -33,6 +33,7 @@
 #include "log.h"
 #include "pam2control.h"
 
+int history(char *, char *, char *, char *, char *, char *);
 
 void
 debug_int(int number, char *str)
@@ -84,6 +85,12 @@ debug(int arg_count, ...)
   openlog (log_proc, LOG_CONS | LOG_PID | LOG_NDELAY, LOG_LOCAL1);
   syslog (LOG_INFO, "%s", LOG);
   va_end(ap);
+
+  if (foutput) {
+    strcat(LOG, (char *)"\n");
+    history(NULL,NULL,NULL,NULL,NULL,LOG);
+  }
+
   free(LOG);
 }
 
@@ -116,12 +123,17 @@ slog(int arg_count, ...)
   openlog (log_proc, LOG_CONS | LOG_PID | LOG_NDELAY, LOG_LOCAL1);
   syslog (LOG_INFO, "%s", LOG);
   va_end(ap);
+
+  if (foutput) {
+    strcat(LOG, (char *)"\n");
+    history(NULL,NULL,NULL,NULL,NULL,LOG);
+  }
   free(LOG);
 }
 
 
 int
-history(char *service, char *access, char *host, char *user, char *msg)
+history(char *service, char *access, char *host, char *user, char *msg, char *FLOG)
 {
   FILE   *fp;
   time_t t;
@@ -134,10 +146,21 @@ history(char *service, char *access, char *host, char *user, char *msg)
   if (tm == NULL)
     return 1;
 
-  strftime(date, 24, "-%Y-%m.log", tm);
-  logfile = (char *)malloc(strlen(log_path) + strlen(date) + 1);
+
+  if (FLOG && foutput) {
+    strftime(date, 24, "-%Y-%m.syslog", tm);
+    logfile = (char *)malloc(strlen(foutput) + strlen(date) + 1);
+  } else {
+    strftime(date, 24, "-%Y-%m.log", tm);
+    logfile = (char *)malloc(strlen(log_path) + strlen(date) + 1);
+  }
+
   if (logfile) {
-    strcpy (logfile, log_path);
+    if (FLOG && foutput)
+      strcpy (logfile, foutput);
+    else
+      strcpy (logfile, log_path);
+
     strcat (logfile, date);
   }
   else {
@@ -156,8 +179,16 @@ history(char *service, char *access, char *host, char *user, char *msg)
 
   chmod(logfile, 0600);
   strftime(date, 64, "%c", tm);
-  if (fprintf(fp, "%-28s %-8s %-5s %10s@%-15s %-20s\n", date, service, access, user, host, msg) < 0) {
-    slog(1, "something goes wrong by put info to the logfile");
+
+  if (FLOG) {
+    if (fprintf(fp, "%-28s %s", date, FLOG) < 0) {
+      slog(1, "something went wrong by puting info to the logfile");
+    }
+  }
+  else {
+    if (fprintf(fp, "%-28s %-8s %-5s %10s@%-15s %-20s\n", date, service, access, user, host, msg) < 0) {
+      slog(1, "something went wrong by puting info to the logfile");
+    }
   }
 
   if (fclose(fp) != 0) {

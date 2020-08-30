@@ -24,4 +24,5 @@
 
 extern char *log_proc;
 extern char *log_path;
+extern char *foutput;
 #endif

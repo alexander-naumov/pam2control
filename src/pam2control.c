@@ -36,7 +36,7 @@ char *    pin_generate(char *);
 char *    conv_PIN(pam_handle_t *);
 int       email_login_notify(char *, char *, char *, char *, char *);
 int       email_pin(char *, char *, char *, char *, char *, char *);
-int       history(char *, char *, char *, char *, char *);
+int       history(char *, char *, char *, char *, char *, char *);
 void      print_list(node_t *);
 void      print_access(access_t *);
 void      print_notify(notify_t *);
@@ -141,6 +141,8 @@ allow(pam_handle_t *pamh, char *service, char *user, char* host)
   debug(3, "p2c: DEFAULT - '", def->DEFAULT, "'");
   debug(3, "p2c: MAILSER - '", def->MAILSERVER, "'");
   debug(3, "p2c: LOGFILE - '", def->LOGFILE, "'");
+  if (def->FILEOUTPUT)
+    debug(3, "p2c: FILEOUT - '", def->FILEOUTPUT, "'");
 
   node_t *conf = NULL;
   conf = get_config(conf, user, service);
@@ -175,7 +177,7 @@ allow(pam_handle_t *pamh, char *service, char *user, char* host)
 
   /* CLOSE */
   if (user_list_checker(CLOSE, user)){
-    history(service, "CLOSE", host, user, "access denied (block list)");
+    history(service, "CLOSE", host, user, "access denied (block list)", NULL);
     return PAM_AUTH_ERR;
   }
 
@@ -188,7 +190,7 @@ allow(pam_handle_t *pamh, char *service, char *user, char* host)
     int sent_mails = send_mail(PIN, def->MAILSERVER, user, host, service, pin);
     if (sent_mails == 0) {
       slog(1, "something went wrong by sending PIN mail");
-      history(service, "CLOSE", host, user, "PIN can not be send");
+      history(service, "CLOSE", host, user, "PIN can not be send", NULL);
       return PAM_AUTH_ERR;
     }
 
@@ -197,11 +199,11 @@ allow(pam_handle_t *pamh, char *service, char *user, char* host)
       if (!strncmp(pin, conv_PIN(pamh), 8)) {
         debug(1, "PIN (entered by user) is correct");
         send_mail(NOTIFY, def->MAILSERVER, user, host, service, NULL);
-        history(service, "OPEN", host, user, "PIN confirmed");
+        history(service, "OPEN", host, user, "PIN confirmed", NULL);
         return PAM_SUCCESS;
       }
       else {
-        history(service, "CLOSE", host, user, "wrong PIN provided");
+        history(service, "CLOSE", host, user, "wrong PIN provided", NULL);
         return PAM_AUTH_ERR;
       }
     }
@@ -210,7 +212,7 @@ allow(pam_handle_t *pamh, char *service, char *user, char* host)
   /* OPEN */
   if (user_list_checker(OPEN, user)) {
     send_mail(NOTIFY, def->MAILSERVER, user, host, service, NULL);
-    history(service, "OPEN", host, user, "access granted");
+    history(service, "OPEN", host, user, "access granted", NULL);
     return PAM_SUCCESS;
   }
 
@@ -218,11 +220,11 @@ allow(pam_handle_t *pamh, char *service, char *user, char* host)
   if ((strncmp(def->DEFAULT, "OPEN",  4) == 0) ||
       (strncmp(def->DEFAULT, "open",  4) == 0)) {
     send_mail(NOTIFY, def->MAILSERVER, user, host, service, NULL);
-    history(service, "OPEN", host, user, "access granted (default rule)");
+    history(service, "OPEN", host, user, "access granted (default rule)", NULL);
     return PAM_SUCCESS;
   }
 
-  history(service, "CLOSE", host, user, "access denied (default rule)");
+  history(service, "CLOSE", host, user, "access denied (default rule)", NULL);
   return PAM_AUTH_ERR;
 }
 
@@ -313,7 +315,7 @@ pam_sm_close_session(pam_handle_t *pamh, int flags, int argc, const char **argv)
   }
   get_default(def);
   slog(2, "closing session: user -> ", user);
-  history(service, "OPEN", host, user, "closing session");
+  history(service, "OPEN", host, user, "closing session", NULL);
   return PAM_SUCCESS;
 }
 
