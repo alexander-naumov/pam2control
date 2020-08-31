@@ -321,11 +321,12 @@ get_config(node_t *head, char *user, char *service)
   }
 
   while ((getline(&line, &len, stream)) != -1) {
-    if ((line[0] == '#')                     ||
-        (strlen(line) < 9)                   ||
-        (strncmp("DEFAULT", line, 7) == 0)   ||
-        (strncmp("LOGFILE", line, 7) == 0)   ||
-        (strncmp("MAILSERVER", line, 10) == 0))
+    if (line[0] == '#'                       ||
+        strlen(line) < 9                     ||
+        strncmp("DEFAULT", line, 7) == 0     ||
+        strncmp("LOGFILE", line, 7) == 0     ||
+        strncmp("FILEOUTPUT", line, 10) == 0 ||
+        strncmp("MAILSERVER", line, 10) == 0)
       continue;
 
     i = 0;

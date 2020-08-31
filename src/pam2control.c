@@ -96,7 +96,6 @@ user_list_checker(access_t *LIST, char *user)
       LIST = LIST->next;
     }
   }
-  debug(1,"--------------");
   return 0;
 }
 
@@ -127,13 +126,13 @@ send_mail(notify_t *ntf, char *server, char *user, char *host, char *service, ch
 
 
 int
-allow(pam_handle_t *pamh, char *service, char *user, char* host)
+allow_auth(pam_handle_t *pamh, char *service, char *user, char* host)
 {
   settings_t *def = NULL;
   def = (settings_t *)malloc(sizeof(settings_t));
   if (def == NULL) {
-    slog(1, "error, can't allocate memory");
-    exit(1);
+    slog(1, "error: can not allocate memory");
+    return PAM_AUTH_ERR;
   }
 
   get_default(def);
@@ -198,8 +197,6 @@ allow(pam_handle_t *pamh, char *service, char *user, char* host)
       debug_int(sent_mails, " PIN mail(s) sent successfully");
       if (!strncmp(pin, conv_PIN(pamh), 8)) {
         debug(1, "PIN (entered by user) is correct");
-        send_mail(NOTIFY, def->MAILSERVER, user, host, service, NULL);
-        history(service, "OPEN", host, user, "PIN confirmed", NULL);
         return PAM_SUCCESS;
       }
       else {
@@ -210,6 +207,60 @@ allow(pam_handle_t *pamh, char *service, char *user, char* host)
   }
 
   /* OPEN */
+  if (user_list_checker(OPEN, user))
+    return PAM_SUCCESS;
+
+
+  /* DEFAULT RULE */
+  if (strncmp(def->DEFAULT, "OPEN",  4) == 0 || strncmp(def->DEFAULT, "open",  4) == 0)
+    return PAM_SUCCESS;
+
+  history(service, "CLOSE", host, user, "access denied (default rule)", NULL);
+  return PAM_AUTH_ERR;
+}
+
+int
+allow_opensession(pam_handle_t *pamh, char *service, char *user, char* host)
+{
+  settings_t *def = NULL;
+  def = (settings_t *)malloc(sizeof(settings_t));
+  if (def == NULL) {
+    slog(1, "error: can not allocate memory");
+    return PAM_AUTH_ERR;
+  }
+
+  get_default(def);
+
+  node_t *conf = NULL;
+  conf = get_config(conf, user, service);
+
+  access_t *OPEN   = NULL;
+  access_t *CLOSE  = NULL;
+  notify_t *NOTIFY = NULL;
+  notify_t *PIN    = NULL;
+
+  int tmp_debug = DEBUG;
+  DEBUG = 0;
+  OPEN   = create_access(OPEN,   "open",    service, user, conf);
+  CLOSE  = create_access(CLOSE,  "close",   service, user, conf);
+  NOTIFY = create_notify(NOTIFY, "notify:", service, user, conf);
+  PIN    = create_notify(PIN,    "pin:",    service, user, conf);
+  DEBUG = tmp_debug;
+
+  /* CLOSE */
+  if (user_list_checker(CLOSE, user)){
+    history(service, "CLOSE", host, user, "access denied (block list)", NULL);
+    return PAM_AUTH_ERR;
+  }
+
+  /*  PIN  */
+  if (PIN) {
+    send_mail(NOTIFY, def->MAILSERVER, user, host, service, NULL);
+    history(service, "OPEN", host, user, "PIN confirmed", NULL);
+    return PAM_SUCCESS;
+  }
+
+  /* OPEN */
   if (user_list_checker(OPEN, user)) {
     send_mail(NOTIFY, def->MAILSERVER, user, host, service, NULL);
     history(service, "OPEN", host, user, "access granted", NULL);
@@ -217,8 +268,7 @@ allow(pam_handle_t *pamh, char *service, char *user, char* host)
   }
 
   /* DEFAULT RULE */
-  if ((strncmp(def->DEFAULT, "OPEN",  4) == 0) ||
-      (strncmp(def->DEFAULT, "open",  4) == 0)) {
+  if (strncmp(def->DEFAULT, "OPEN",  4) == 0 || strncmp(def->DEFAULT, "open",  4) == 0) {
     send_mail(NOTIFY, def->MAILSERVER, user, host, service, NULL);
     history(service, "OPEN", host, user, "access granted (default rule)", NULL);
     return PAM_SUCCESS;
@@ -230,8 +280,46 @@ allow(pam_handle_t *pamh, char *service, char *user, char* host)
 
 
 int
+pam_sm_authenticate(pam_handle_t *pamh, int flags, int argc, const char **argv)
+{
+  int ret = PAM_AUTH_ERR;
+
+  char *user    = NULL;
+  char *service = NULL;
+  char *host    = NULL;
+
+  (void) pam_get_user(pamh, (const char **) &user, NULL);
+  (void) pam_get_item(pamh, PAM_SERVICE, (const void **) &service);
+  (void) pam_get_item(pamh, PAM_RHOST, (const void **) &host);
+
+  asprintf(&log_proc, "pam2control(%s:%s)", service, user);
+  slog(1, "==== authentication phase =====================");
+
+  for (int i = 0; i<argc; i++)
+  {
+    if ((argv[i]) && (strncmp(argv[i],"debug",5) == 0))
+      DEBUG = 1;
+  }
+
+  if (strstr(host,"::1") || strlen(host) == 0)
+    host = "localhost";
+
+  ret = allow_auth(pamh, service, user, host);
+
+  if (ret == PAM_SUCCESS){
+    slog(1, "access granted");
+    return PAM_SUCCESS;
+  }
+
+  slog(1, "access denied");
+  return ret;
+}
+
+
+int
 pam_sm_open_session(pam_handle_t *pamh, int flags, int argc, const char **argv)
 {
+
   int ret = PAM_AUTH_ERR;
 
   char *user    = NULL;
@@ -254,7 +342,7 @@ pam_sm_open_session(pam_handle_t *pamh, int flags, int argc, const char **argv)
   if (strstr(host,"::1") || strlen(host) == 0)
     host = "localhost";
 
-  ret = allow(pamh, service, user, host);
+  ret = allow_opensession(pamh, service, user, host);
 
   if (ret == PAM_SUCCESS){
     slog(1, "access granted");
@@ -263,22 +351,6 @@ pam_sm_open_session(pam_handle_t *pamh, int flags, int argc, const char **argv)
 
   slog(1, "access denied");
   return ret;
-}
-
-
-int
-pam_sm_authenticate(pam_handle_t *pamh, int flags, int argc, const char **argv)
-{
-
-  char *service = NULL;
-  char *user    = NULL;
-
-  (void) pam_get_user(pamh, (const char **) &user, NULL);
-  (void) pam_get_item(pamh, PAM_SERVICE, (const void **) &service);
-
-  asprintf(&log_proc, "pam2control(%s:%s)", service, user);
-  slog(1, "==== authentication phase =====================");
-  return PAM_SUCCESS;
 }
 
 
@@ -302,7 +374,6 @@ pam_sm_close_session(pam_handle_t *pamh, int flags, int argc, const char **argv)
 
   asprintf(&log_proc, "pam2control(%s:%s)", service, user);
   slog(1, "==== closing session ==========================");
-
 
   if (strstr(host,"::1") || strlen(host) == 0)
     host = "localhost";
