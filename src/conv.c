@@ -65,7 +65,7 @@ conv_PIN(pam_handle_t *pamh)
   if (response)
     pin = strndup(response->resp, 8);
   else {
-    debug(1, "pam_convp->conv: NO RESPONCE!");
+    debug(1, "pam_convp->conv: NO RESPONSE!");
     pin = (char *)"ERRORPIN";
   }
   debug(3, "conv: entered pin -> '", pin, "'");
