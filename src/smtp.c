@@ -245,6 +245,9 @@ email_pin(char *server, char *to, char *host, char *user, char *service, char *p
 
   asprintf(&from, "pam2control@%s", hostname);
   asprintf(&subj, "[p2c] your PIN");
+#if __FreeBSD__
+  snprintf(pin, 9, "%s", pin);
+#endif
   asprintf(&body, "%s", pin);
   asprintf(&mail, "Subject: %s\r\n%s\r\n.\r\n", subj, body);
 
