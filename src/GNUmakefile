@@ -14,8 +14,8 @@ p2ctl: p2ctl.c
 
 
 install:
-	install -m 750 p2ctl $(BIN)
 	install -m 755 pam2control.so $(shell ./p2ctl search_path)
+	install -m 750 p2ctl $(BIN)
 	mkdir -p /etc/pam2control
 	mkdir -p /var/log/pam2control
 	mkdir -p /usr/share/man/man5/

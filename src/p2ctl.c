@@ -26,13 +26,15 @@
 #include <dirent.h>
 
 char *pam_path[] = {
-  "/lib/security\0",
-  "/lib64/security\0",
-  "/lib/x86_64-linux-gnu\0",
-  "/lib/i386-linux-gnu\0",
-  "/usr/lib/x86_64-linux-gnu\0",
-  "/usr/lib/i386-linux-gnu\0",
-  "/usr/lib\0"                   /* FreeBSD */
+  "/lib/security",
+  "/lib64/security",
+  "/lib/x86_64-linux-gnu",
+  "/lib/i386-linux-gnu",
+  "/usr/lib/x86_64-linux-gnu",
+  "/usr/lib/x86_64-linux-gnu/security",
+  "/usr/lib/i386-linux-gnu",
+  "/usr/lib/i386-linux-gnu/security",
+  "/usr/lib"                           /* FreeBSD */
 };
 
 void
@@ -54,13 +56,13 @@ modules_search(char *PATH[])
 
   dp = opendir (PATH[0]);
   if (dp != NULL) {
-    while ((ep = readdir (dp))) {
-      if (strncmp(ep->d_name, "pam_", 4)) {
+    while ((ep = readdir (dp)) != NULL) {
+      if (strncmp(ep->d_name, "pam_", 4) == 0) {
         (void) closedir (dp);
         return PATH[0];
       }
-      (void) closedir (dp);
     }
+    (void) closedir (dp);
   }
   return modules_search(&PATH[1]);
 }
@@ -76,7 +78,7 @@ int main(int argc, char *argv[])
    * everything from pam-accesscontrol
    */
 
-  if (argc == 1)
+  if (argc == 1 || (argc > 1 && strncmp(argv[1], "--help", 6) == 0))
     usage(1);
   else 
     if (!strncmp(argv[1], "search_path", 11))
