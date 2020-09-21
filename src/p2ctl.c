@@ -78,11 +78,16 @@ int main(int argc, char *argv[])
    * everything from pam-accesscontrol
    */
 
-  if (argc == 1 || (argc > 1 && strncmp(argv[1], "--help", 6) == 0))
+  if (argc == 1)
     usage(1);
-  else 
-    if (!strncmp(argv[1], "search_path", 11))
-      printf("%s\n", modules_search(pam_path));
+
+  if (argv[1] && !strncmp(argv[1], "help", 4))
+    usage(0);
+
+  if (argv[1] && !strncmp(argv[1], "search_path", 11))
+    printf("%s\n", modules_search(pam_path));
+  else
+    usage(1);
   
   return 0;
 }
