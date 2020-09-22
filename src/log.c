@@ -87,7 +87,8 @@ debug(int arg_count, ...)
   va_end(ap);
 
   if (foutput) {
-    strcat(LOG, (char *)"\n");
+    if (LOG)
+      strcat(LOG, (char *)"\n");
     history(NULL,NULL,NULL,NULL,NULL,LOG);
   }
 
@@ -125,7 +126,8 @@ slog(int arg_count, ...)
   va_end(ap);
 
   if (foutput) {
-    strcat(LOG, (char *)"\n");
+    if (LOG)
+      strcat(LOG, (char *)"\n");
     history(NULL,NULL,NULL,NULL,NULL,LOG);
   }
   free(LOG);
@@ -170,6 +172,8 @@ history(char *service, char *access, char *host, char *user, char *msg, char *FL
 
   if ((fp = fopen(logfile, "a")) == NULL) {
     slog(1, "can't open logfile...");
+    free(logfile);
+
     if (errno == EROFS)
       slog(1, "logfile is on read only FS");
     if (errno == ENOENT)
@@ -193,6 +197,7 @@ history(char *service, char *access, char *host, char *user, char *msg, char *FL
 
   if (fclose(fp) != 0) {
     slog(1, "something goes wrong by closing file");
+    free(logfile);
     return 1;
   }
 
