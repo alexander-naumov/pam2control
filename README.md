@@ -1,5 +1,6 @@
 # pam2control
 [![Build Status](https://travis-ci.org/alexander-naumov/pam2control.svg?branch=master)](https://travis-ci.org/alexander-naumov/pam2control)
+[![License](https://img.shields.io/github/license/alexander-naumov/pam2control)](https://github.com/alexander-naumov/pam2control/LICENSE)
 
 pam2control, commonly known as p2c, is the easily configurable PAM-based
 authentication provider.
