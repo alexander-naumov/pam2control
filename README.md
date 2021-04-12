@@ -25,7 +25,7 @@ It supports FreeBSD and GNU/Linux systems.
 - [ ] Separated access rules for SSH- and SCP-sessions.
 
 ## Installing pam2control
-```
+```bash
 > cd src
 > make
 # make install
