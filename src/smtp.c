@@ -48,26 +48,25 @@ void      debug_int(int, char *);
 int
 connect_smtp(char* server, short port)
 {
-  int sock = -1;
-  struct sockaddr_in conn;
-  struct hostent *host = NULL;
+  int err, sock = -1;
+  struct addrinfo *infop = NULL, hint;
+  memset(&hint, 0, sizeof(hint));
 
-  if((host = gethostbyname(server)) == NULL) {
-    debug(2, "gethostbyname: ", strerror(errno));
+  hint.ai_family   = AF_INET;
+  hint.ai_socktype = SOCK_STREAM;
+
+  if((err = getaddrinfo(server, "smtp", &hint, &infop)) != 0) {
+    debug(2, "getaddrinfo: ", gai_strerror(err));
     return -1;
   }
 
-  conn.sin_family = AF_INET;
-  conn.sin_port   = htons(port);
-  conn.sin_addr   = *((struct in_addr *)host->h_addr);
-
-  sock = socket(AF_INET, SOCK_STREAM, 0);
+  sock = socket(hint.ai_family, hint.ai_socktype, 0);
   if (sock < 0) {
     debug(2, "socket: ", strerror(errno));
     return -1;
   }
 
-  if (connect(sock, (struct sockaddr *)&conn, sizeof(conn)) < 0) {
+  if (connect(sock, infop->ai_addr, infop->ai_addrlen) < 0) {
     close(sock);
     debug(2, "connect: ", strerror(errno));
     return -1;
