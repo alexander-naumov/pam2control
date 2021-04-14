@@ -251,8 +251,10 @@ email_pin(char *server, char *to, char *host, char *user, char *service, char *p
   asprintf(&mail, "Subject: %s\r\n%s\r\n.\r\n", subj, body);
 
   debug(2, "server = ", server);
-  if ((sock = connect_smtp(server, SMTP_PORT)) == -1)
+  if ((sock = connect_smtp(server, SMTP_PORT)) == -1) {
     slog(1, "connect to mail server FAILED");
+    return ret;
+  }
   else
     debug(1, "successfully connected to mail server");
 
@@ -293,8 +295,10 @@ email_login_notify(char *server, char *to, char *host, char *user, char *service
   asprintf(&mail, "Subject: %s\r\n%s\r\n.\r\n", subj, body);
 
   debug(2, "server = ", server);
-  if ((sock = connect_smtp(server, SMTP_PORT)) == -1)
+  if ((sock = connect_smtp(server, SMTP_PORT)) == -1) {
     slog(1, "connect to mail server FAILED");
+    return ret;
+  }
   else
     debug(1, "successfully connected to mail server");
 
