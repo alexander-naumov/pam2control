@@ -1,4 +1,4 @@
-/*
+/**************************************************************************
  * Copyright (c) 2018-2020 Alexander Naumov <alexander_naumov@opensuse.org>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -16,11 +16,11 @@
  * http://www.gnu.org/licenses/, or contact Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA  02111-1301  USA
  *
- ****************************************************************
+ **************************************************************************
  */
 
 #ifndef PAM2CONTROL_H
 #define PAM2CONTROL_H
 
 extern int DEBUG;
-#endif
+#endif /* PAM2CONTROL_H */
