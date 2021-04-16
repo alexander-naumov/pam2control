@@ -19,4 +19,7 @@ script:
   - nm pam2control.so
   - ls -la p2ctl
   - file p2ctl
+  - ./p2ctl help
+  - ./p2ctl version
+  - ./p2ctl search_path
   - nm p2ctl
