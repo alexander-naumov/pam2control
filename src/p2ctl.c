@@ -25,6 +25,8 @@
 #include <sys/types.h>
 #include <dirent.h>
 
+char *VERSION = "0.3 beta (16.04.21)";
+
 char *pam_path[] = {
   "/lib/security",
   "/lib64/security",
@@ -37,10 +39,16 @@ char *pam_path[] = {
   "/usr/lib"                           /* FreeBSD */
 };
 
+
 void
 usage(int ret)
 {
-printf("Usage\n");
+printf("\nUsage: p2ctl [OPTIONS]... [FILE]...\n\n");
+printf("Available options:\n");
+printf("  search_path  - show PATH of PAM modules\n");
+printf("  version      - show version of pam2control\n");
+printf("  help         - show this help message\n\n");
+
 exit(ret);
 }
 
@@ -81,13 +89,20 @@ int main(int argc, char *argv[])
   if (argc == 1)
     usage(1);
 
-  if (argv[1] && !strncmp(argv[1], "help", 4))
-    usage(0);
+  if (argc == 2 && argv[1]) {
+    if (!strncmp(argv[1], "version", 7)) {
+      printf("Version %s\n\n", VERSION);
+      return 0;
+    }
+    if (!strncmp(argv[1], "help", 4))
+      usage(0);
 
-  if (argv[1] && !strncmp(argv[1], "search_path", 11))
-    printf("%s\n", modules_search(pam_path));
-  else
-    usage(1);
+    if (!strncmp(argv[1], "search_path", 11))
+      printf("%s\n", modules_search(pam_path));
+
+    else
+      usage(1);
+  }
   
   return 0;
 }
