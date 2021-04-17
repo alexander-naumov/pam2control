@@ -25,7 +25,7 @@
 #include <sys/types.h>
 #include <dirent.h>
 
-char *VERSION = "0.3 beta (16.04.21)";
+#define VERSION "0.3 beta (17.04.21)\0"
 
 char *pam_path[] = {
   "/lib/security",
