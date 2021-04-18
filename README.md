@@ -25,15 +25,16 @@ It supports FreeBSD and GNU/Linux systems.
 - [ ] Separated access rules for SSH- and SCP-sessions.
 
 ## Installing pam2control
-```bash
-> cd src
-> make
-# make install
+```sh
+git clone https://github.com/alexander-naumov/pam2control
+cd pam2control/src
+make
+sudo make install
 ```
 The p2c.conf man page has details on how to configure pam2control.
 
 ## Credits
 
-Copyright (c) 2018-2020 Alexander Naumov (alexander_naumov@opensuse.org).
+Copyright (c) 2018-2021 Alexander Naumov (alexander_naumov@opensuse.org).
 
 Licensed under GNU GPLv3 (see [LICENSE](https://github.com/alexander-naumov/pam2control/blob/master/LICENSE) file).
