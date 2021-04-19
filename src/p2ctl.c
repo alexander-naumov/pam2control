@@ -19,11 +19,15 @@
  ****************************************************************
  */
 
+#define _GNU_SOURCE
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
 #include <sys/types.h>
 #include <dirent.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <errno.h>
 
 #define VERSION "0.3 beta (17.04.21)\0"
 
@@ -45,10 +49,11 @@ usage(int ret)
 {
 printf("\nUsage: p2ctl [OPTIONS]... [FILE]...\n\n");
 printf("Available options:\n");
-printf("  search_path  - show PATH of PAM modules\n");
-printf("  version      - show version of pam2control\n");
-printf("  help         - show this help message\n\n");
-
+printf("  pam_configure  [service] - configure daemon to use pam2control\n");
+printf("  pam_configured [service] - configure daemon to use pam2control (debug mode)\n");
+printf("  search_path              - show PATH of PAM modules\n");
+printf("  version                  - show version of pam2control\n");
+printf("  help                     - show this help message\n\n");
 exit(ret);
 }
 
@@ -76,12 +81,67 @@ modules_search(char *PATH[])
 }
 
 
+void
+pam_configure(char *service, int debug)
+{
+  int fd;
+  ssize_t fd_w;
+  char *path;
+  char *conf;
+
+  if (debug)
+    asprintf(&conf,
+           "auth       required     pam2control.so debug\n" \
+           "session    required     pam2control.so debug\n");
+  else
+    asprintf(&conf,
+           "auth       required     pam2control.so\n" \
+           "session    required     pam2control.so\n");
+
+  asprintf(&path, "/etc/pam.d/%s", service);
+
+  if ((fd = open(path, O_WRONLY)) < 0) {
+    fprintf(stderr, "open: %s\n", strerror(errno));
+    exit(1);
+  }
+
+  if (lseek(fd, 0, SEEK_END) < 0) {
+    fprintf(stderr, "lseek: %s\n", strerror(errno));
+    exit(1);
+  }
+
+  if ((fd_w = write(fd, conf, strlen(conf))) != strlen(conf)) {
+    fprintf(stderr, "write: %s\n", strerror(errno));
+    exit(1);
+  }
+
+  close(fd);
+  free(path);
+  free(conf);
+}
+
+
+void
+pam_list()
+{
+  struct dirent *dir;
+  DIR *dp = opendir("/etc/pam.d/");
+
+  if (dp != NULL) {
+    while ((dir = readdir (dp)) != NULL) {
+      if (strcmp(dir->d_name, ".") != 0 &&
+          strcmp(dir->d_name, "..") != 0)
+        printf("%s\n", dir->d_name);
+    }
+  }
+  (void) closedir (dp);
+}
+
+
 int main(int argc, char *argv[])
 {
   /* TODO
-   * add info to   /etc/pam.d/sshd, etc
    * rem info from /etc/pam.d/sshd, etc
-   * show list
    * check my config
    * everything from pam-accesscontrol
    */
@@ -90,19 +150,33 @@ int main(int argc, char *argv[])
     usage(1);
 
   if (argc == 2 && argv[1]) {
-    if (!strncmp(argv[1], "version", 7)) {
+    if (!strncmp(argv[1], "version", 7))
       printf("Version %s\n\n", VERSION);
-      return 0;
-    }
-    if (!strncmp(argv[1], "help", 4))
+
+    else if (!strncmp(argv[1], "help", 4))
       usage(0);
 
-    if (!strncmp(argv[1], "search_path", 11))
+    else if (!strncmp(argv[1], "search_path", 11))
       printf("%s\n", modules_search(pam_path));
+
+    else if (!strncmp(argv[1], "pam_list", 8))
+      pam_list();
 
     else
       usage(1);
   }
-  
+
+  if (argc == 3 && argv[1] && argv[2]) {
+
+    if (!strncmp(argv[1], "pam_configured", 14))
+      pam_configure(argv[2], 1);
+
+    else if (!strncmp(argv[1], "pam_configure", 13))
+      pam_configure(argv[2], 0);
+
+    else
+      usage(1);
+  }
+
   return 0;
 }
