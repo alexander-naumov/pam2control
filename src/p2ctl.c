@@ -146,20 +146,17 @@ int main(int argc, char *argv[])
    * everything from pam-accesscontrol
    */
 
-  if (argc == 1)
-  	usage(1);
-
-  if (argc == 2 && argv[1]) {
+  if (argc == 1 || argc == 2 && argv[1]) {
     if (!strncmp(argv[1], "version", 7))
       printf("Version: %s\n\n", VERSION);
 
-    if (!strncmp(argv[1], "help", 4))
+    else if (!strncmp(argv[1], "help", 4))
       usage(0);
 
-    if (!strncmp(argv[1], "search_path", 11))
+    else if (!strncmp(argv[1], "search_path", 11))
       printf("%s\n", modules_search(pam_path));
 
-    if (!strncmp(argv[1], "pam_list", 8))
+    else if (!strncmp(argv[1], "pam_list", 8))
       pam_list();
 
     else
