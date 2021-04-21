@@ -146,12 +146,9 @@ int main(int argc, char *argv[])
    * everything from pam-accesscontrol
    */
 
-  if (argc == 1)
-    usage(1);
-
-  if (argc == 2 && argv[1]) {
+  if (argc == 1 || argc == 2 && argv[1]) {
     if (!strncmp(argv[1], "version", 7))
-      printf("Version %s\n\n", VERSION);
+      printf("Version: %s\n\n", VERSION);
 
     else if (!strncmp(argv[1], "help", 4))
       usage(0);
